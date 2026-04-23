@@ -36,6 +36,13 @@
             --border-subtle: rgba(76, 201, 240, 0.12);
             --border-radius: 16px;
             --transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+            --tier-bg-a: rgba(124, 58, 237, 0.14);
+            --tier-bg-b: rgba(76, 201, 240, 0.08);
+            --tier-bg-c: #070f22;
+            --tier-card-radius-boost: 0px;
+            --tier-hue: 0deg;
+            --tier-sat: 1;
+            --tier-bright: 1;
         }
 
         * {
@@ -50,14 +57,99 @@
         }
 
         body {
-            background: radial-gradient(1200px 600px at 12% -10%, rgba(124, 58, 237, 0.14), transparent 55%),
-                radial-gradient(900px 500px at 100% 0%, rgba(76, 201, 240, 0.08), transparent 50%),
-                linear-gradient(165deg, var(--navy-deep) 0%, var(--bg-base) 45%, #070f22 100%);
+            background: radial-gradient(1200px 600px at 12% -10%, var(--tier-bg-a), transparent 55%),
+                radial-gradient(900px 500px at 100% 0%, var(--tier-bg-b), transparent 50%),
+                linear-gradient(165deg, var(--navy-deep) 0%, var(--bg-base) 45%, var(--tier-bg-c) 100%);
             color: var(--text-main);
             display: flex;
             min-height: 100vh;
             overflow-x: hidden;
             overflow-y: auto;
+        }
+
+        /* Tema lendário por tier (a cada 10 níveis) */
+        body::before,
+        body::after {
+            content: '';
+            position: fixed;
+            inset: -20%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        body::before {
+            background:
+                radial-gradient(900px 520px at 8% 0%, rgba(199, 125, 255, var(--tier-aura, 0.06)), transparent 60%),
+                radial-gradient(820px 520px at 100% 10%, rgba(76, 201, 240, var(--tier-aura2, 0.05)), transparent 58%),
+                radial-gradient(900px 700px at 55% 105%, rgba(244, 114, 182, var(--tier-aura3, 0.03)), transparent 62%);
+            filter: blur(calc(10px + (22px * var(--tier-intensity, 0))));
+            opacity: calc(0.45 + (0.45 * var(--tier-intensity, 0)));
+            mix-blend-mode: screen;
+            transform: translate3d(0,0,0);
+            animation: tierAurora 14s linear infinite;
+        }
+        body::after {
+            background:
+                conic-gradient(from 200deg at 50% 40%,
+                    rgba(76, 201, 240, calc(0.02 + (0.10 * var(--tier-intensity, 0)))),
+                    rgba(199, 125, 255, calc(0.02 + (0.12 * var(--tier-intensity, 0)))),
+                    rgba(124, 58, 237, calc(0.02 + (0.10 * var(--tier-intensity, 0)))),
+                    rgba(244, 114, 182, calc(0.01 + (0.08 * var(--tier-intensity, 0)))),
+                    rgba(76, 201, 240, calc(0.02 + (0.10 * var(--tier-intensity, 0))))
+                );
+            opacity: calc(0.10 + (0.55 * var(--tier-intensity, 0)));
+            filter: blur(calc(16px + (26px * var(--tier-intensity, 0))));
+            animation: tierHalo 18s linear infinite;
+            mix-blend-mode: overlay;
+        }
+        @keyframes tierAurora {
+            0% { transform: translate3d(-2%, -1%, 0) scale(1.02); }
+            50% { transform: translate3d(2%, 1%, 0) scale(1.06); }
+            100% { transform: translate3d(-2%, -1%, 0) scale(1.02); }
+        }
+        @keyframes tierHalo {
+            0% { transform: rotate(0deg) scale(1.02); }
+            100% { transform: rotate(360deg) scale(1.02); }
+        }
+
+        nav, main, header.mobile-top-bar, .nav-backdrop, #toast-container, .modal-overlay {
+            position: relative;
+            z-index: 1;
+        }
+
+        body[data-tier] nav,
+        body[data-tier] .card,
+        body[data-tier] .chart-wrapper,
+        body[data-tier] .section-block,
+        body[data-tier] .history-log {
+            border-color: rgba(199, 125, 255, calc(0.08 + (0.26 * var(--tier-intensity, 0))));
+            box-shadow:
+                0 10px 40px rgba(0,0,0, calc(0.32 + (0.12 * var(--tier-intensity, 0)))),
+                0 0 calc(18px + (38px * var(--tier-intensity, 0))) rgba(199, 125, 255, calc(0.06 + (0.16 * var(--tier-intensity, 0)))),
+                0 0 calc(10px + (26px * var(--tier-intensity, 0))) rgba(76, 201, 240, calc(0.04 + (0.12 * var(--tier-intensity, 0))));
+            border-radius: calc(var(--border-radius) + var(--tier-card-radius-boost, 0px));
+            filter: hue-rotate(var(--tier-hue)) saturate(var(--tier-sat)) brightness(var(--tier-bright));
+            transition: filter 120ms linear, border-color 160ms ease, box-shadow 160ms ease;
+        }
+
+        /* Intensidade por tier (1..10) */
+        body[data-tier="1"]  { --tier-intensity: 0.08; --tier-aura: 0.06; --tier-aura2: 0.05; --tier-aura3: 0.03; --tier-bg-a: rgba(124,58,237,0.12); --tier-bg-b: rgba(76,201,240,0.07); --tier-bg-c: #070f22; --tier-card-radius-boost: 0px; --tier-hue: 0deg;  --tier-sat: 1;    --tier-bright: 1; }
+        body[data-tier="2"]  { --tier-intensity: 0.14; --tier-aura: 0.08; --tier-aura2: 0.07; --tier-aura3: 0.04; --tier-bg-a: rgba(70,110,235,0.18); --tier-bg-b: rgba(100,180,255,0.10); --tier-bg-c: #061026; --tier-card-radius-boost: 0px; --tier-hue: 20deg; --tier-sat: 1.08; --tier-bright: 1.02; }
+        body[data-tier="3"]  { --tier-intensity: 0.22; --tier-aura: 0.10; --tier-aura2: 0.08; --tier-aura3: 0.05; --tier-bg-a: rgba(98,88,220,0.20); --tier-bg-b: rgba(88,168,220,0.10); --tier-bg-c: #09122a; --tier-card-radius-boost: 1px; --tier-hue: 36deg; --tier-sat: 1.12; --tier-bright: 1.03; }
+        body[data-tier="4"]  { --tier-intensity: 0.32; --tier-aura: 0.12; --tier-aura2: 0.10; --tier-aura3: 0.06; --tier-bg-a: rgba(116,86,232,0.22); --tier-bg-b: rgba(60,173,223,0.12); --tier-bg-c: #0a132e; --tier-card-radius-boost: 1px; --tier-hue: 52deg; --tier-sat: 1.16; --tier-bright: 1.04; }
+        body[data-tier="5"]  { --tier-intensity: 0.44; --tier-aura: 0.14; --tier-aura2: 0.12; --tier-aura3: 0.08; --tier-bg-a: rgba(136,92,238,0.24); --tier-bg-b: rgba(66,184,226,0.14); --tier-bg-c: #0a1432; --tier-card-radius-boost: 2px; --tier-hue: 70deg; --tier-sat: 1.20; --tier-bright: 1.05; }
+        body[data-tier="6"]  { --tier-intensity: 0.58; --tier-aura: 0.16; --tier-aura2: 0.14; --tier-aura3: 0.10; --tier-bg-a: rgba(154,94,242,0.26); --tier-bg-b: rgba(70,196,229,0.16); --tier-bg-c: #0b1538; --tier-card-radius-boost: 2px; --tier-hue: 90deg; --tier-sat: 1.24; --tier-bright: 1.06; }
+        body[data-tier="7"]  { --tier-intensity: 0.72; --tier-aura: 0.18; --tier-aura2: 0.16; --tier-aura3: 0.12; --tier-bg-a: rgba(164,96,248,0.28); --tier-bg-b: rgba(76,208,233,0.18); --tier-bg-c: #0b173d; --tier-card-radius-boost: 3px; --tier-hue: 110deg; --tier-sat: 1.28; --tier-bright: 1.07; }
+        body[data-tier="8"]  { --tier-intensity: 0.84; --tier-aura: 0.20; --tier-aura2: 0.18; --tier-aura3: 0.14; --tier-bg-a: rgba(176,102,252,0.30); --tier-bg-b: rgba(88,220,238,0.20); --tier-bg-c: #0b1942; --tier-card-radius-boost: 3px; --tier-hue: 130deg; --tier-sat: 1.32; --tier-bright: 1.08; }
+        body[data-tier="9"]  { --tier-intensity: 0.93; --tier-aura: 0.22; --tier-aura2: 0.20; --tier-aura3: 0.16; --tier-bg-a: rgba(188,110,255,0.33); --tier-bg-b: rgba(98,230,242,0.22); --tier-bg-c: #0b1b48; --tier-card-radius-boost: 4px; --tier-hue: 148deg; --tier-sat: 1.36; --tier-bright: 1.09; }
+        body[data-tier="10"] { --tier-intensity: 1; --tier-aura: 0.24; --tier-aura2: 0.22; --tier-aura3: 0.18; --tier-bg-a: rgba(204,118,255,0.38); --tier-bg-b: rgba(118,238,245,0.26); --tier-bg-c: #0c1e52; --tier-card-radius-boost: 5px; --tier-hue: 165deg; --tier-sat: 1.42; --tier-bright: 1.11; }
+
+        body.level-theme-off::before,
+        body.level-theme-off::after {
+            display: none;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            body::before, body::after { animation: none !important; }
         }
 
         /* Scrollbar customizada */
@@ -127,6 +219,175 @@
             display: flex;
             align-items: center;
             gap: 8px;
+        }
+        .level-title.level-title-clickable {
+            cursor: pointer;
+            padding: 8px 10px;
+            border-radius: 14px;
+            border: 1px solid rgba(199, 125, 255, 0.12);
+            background: linear-gradient(135deg, rgba(199, 125, 255, 0.10), rgba(76, 201, 240, 0.06));
+            position: relative;
+            overflow: hidden;
+            transition: transform 240ms ease, box-shadow 240ms ease, border-color 240ms ease, background 240ms ease;
+        }
+        .level-title.level-title-clickable::after {
+            content: '';
+            position: absolute;
+            inset: -40%;
+            background: radial-gradient(closest-side, rgba(255,255,255,0.18), transparent 60%);
+            transform: translateX(-40%) rotate(12deg);
+            opacity: 0;
+            transition: transform 420ms ease, opacity 260ms ease;
+            pointer-events: none;
+            mix-blend-mode: overlay;
+        }
+        .level-title.level-title-clickable:hover {
+            transform: translateY(-1px);
+            border-color: rgba(199, 125, 255, 0.35);
+            box-shadow: 0 10px 28px rgba(0,0,0,0.35), 0 0 22px rgba(199, 125, 255, 0.18);
+        }
+        .level-title.level-title-clickable:hover::after {
+            opacity: 1;
+            transform: translateX(40%) rotate(12deg);
+        }
+        .level-title.level-title-clickable:active {
+            transform: translateY(0px) scale(0.99);
+        }
+
+        .level-codex {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            min-height: 0;
+        }
+        .level-codex-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .level-codex-header h2 {
+            margin: 0;
+            font-family: 'Cinzel', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            background: linear-gradient(90deg, rgba(232,237,255,1), rgba(155,176,220,1));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .level-codex-sub {
+            color: var(--text-muted);
+            font-weight: 650;
+            font-size: 0.9rem;
+        }
+        .level-codex-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 12px;
+            overflow-y: auto;
+            padding-right: 6px;
+            min-height: 0;
+            max-height: calc(90vh - 170px);
+        }
+        .level-card {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            grid-template-areas:
+                "title title"
+                "badge icon"
+                "hint hint";
+            gap: 10px 12px;
+            align-items: center;
+            padding: 14px;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: linear-gradient(155deg, rgba(12, 20, 40, 0.92), rgba(8, 14, 30, 0.86));
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28), inset 0 0 24px rgba(124, 58, 237, 0.05);
+            transition: transform 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .level-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(260px 120px at 10% 0%, rgba(199,125,255,0.14), transparent 60%),
+                        radial-gradient(240px 120px at 100% 100%, rgba(76,201,240,0.12), transparent 55%);
+            opacity: 0.9;
+            pointer-events: none;
+        }
+        .level-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(199, 125, 255, 0.28);
+            box-shadow: 0 14px 40px rgba(0, 0, 0, 0.35), 0 0 26px rgba(76, 201, 240, 0.10);
+        }
+        .level-card .lvl-badge {
+            grid-area: badge;
+            flex: 0 0 auto;
+            min-width: 62px;
+            padding: 8px 10px;
+            border-radius: 14px;
+            text-align: center;
+            font-weight: 900;
+            letter-spacing: 0.04em;
+            color: #f7f3ff;
+            background: linear-gradient(135deg, rgba(124,58,237,0.35), rgba(199,125,255,0.22));
+            border: 1px solid rgba(199,125,255,0.22);
+            box-shadow: 0 0 18px rgba(199,125,255,0.10);
+            position: relative;
+            z-index: 1;
+        }
+        .level-card .lvl-icon {
+            grid-area: icon;
+            justify-self: end;
+            font-size: 1.35rem;
+            color: var(--neon-purple);
+            filter: drop-shadow(0 0 10px rgba(199, 125, 255, 0.35));
+            margin-top: 2px;
+            position: relative;
+            z-index: 1;
+        }
+        .level-card .lvl-info {
+            display: contents;
+            position: relative;
+            z-index: 1;
+        }
+        .level-card .lvl-name {
+            grid-area: title;
+            font-family: 'Cinzel', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-weight: 900;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            font-size: 0.92rem;
+            line-height: 1.2;
+            min-height: 2.35em;
+            display: flex;
+            align-items: flex-start;
+        }
+        .level-card .lvl-hint {
+            grid-area: hint;
+            color: var(--text-muted);
+            font-size: 0.84rem;
+            line-height: 1.35;
+        }
+
+        .tier-toggle-btn {
+            border-radius: 999px;
+            border: 1px solid rgba(199,125,255,0.32);
+            background: linear-gradient(135deg, rgba(124,58,237,0.22), rgba(76,201,240,0.14));
+            color: #e9ddff;
+            font-weight: 800;
+            letter-spacing: 0.03em;
+            padding: 10px 14px;
+            box-shadow: 0 0 18px rgba(124,58,237,0.18), inset 0 0 16px rgba(76,201,240,0.08);
+        }
+        .tier-toggle-btn.is-off {
+            border-color: rgba(139,159,212,0.28);
+            background: linear-gradient(135deg, rgba(40,50,78,0.6), rgba(25,34,60,0.6));
+            color: var(--text-muted);
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.35);
         }
         .level-title i {
             color: var(--neon-purple);
@@ -315,9 +576,16 @@
             bottom: 0;
             width: 0%;
             border-radius: 999px;
-            background: linear-gradient(90deg, rgba(76,201,240,0.9), rgba(199,125,255,0.95), rgba(124,58,237,0.9), rgba(76,201,240,0.9));
-            background-size: 220% 100%;
-            animation: progressGlowShift 2.4s linear infinite;
+            background: repeating-linear-gradient(
+                90deg,
+                rgba(76,201,240,0.90) 0%,
+                rgba(199,125,255,0.95) 22%,
+                rgba(124,58,237,0.90) 48%,
+                rgba(76,201,240,0.90) 72%,
+                rgba(199,125,255,0.95) 100%
+            );
+            background-size: 200% 100%;
+            animation: progressGlowShift 3.2s linear infinite;
             box-shadow: 0 0 22px rgba(199, 125, 255, 0.18), 0 0 18px rgba(76, 201, 240, 0.12);
             transition: width 700ms cubic-bezier(0.2, 0.9, 0.2, 1);
         }
@@ -345,7 +613,7 @@
         }
         @keyframes progressGlowShift {
             0% { background-position: 0% 50%; }
-            100% { background-position: 100% 50%; }
+            100% { background-position: 200% 50%; }
         }
         @keyframes progressShimmer {
             0%, 100% { transform: translateX(-30%); opacity: 0.55; }
@@ -515,7 +783,11 @@
             aspect-ratio: 1;
             min-height: 0;
             border-radius: clamp(6px, 0.9vw, 2px);
-            background: rgba(17, 29, 58, 0.95);
+            background: linear-gradient(
+                135deg,
+                rgba(76, 201, 240, calc(0.06 + (0.62 * var(--hm-i, 0)))),
+                rgba(199, 125, 255, calc(0.05 + (0.56 * var(--hm-i, 0))))
+            );
             cursor: pointer;
             position: relative;
             display: flex;
@@ -527,15 +799,16 @@
             text-align: center;
             gap: 0;
             border: 1px solid rgba(76, 201, 240, 0.06);
+            box-shadow: 0 0 0 1px rgba(199, 125, 255, calc(0.02 + (0.12 * var(--hm-i, 0))));
         }
         .heatmap-cell .hm-dow { font-size: clamp(0.42rem, 0.75vw, 0.62rem); line-height: 1; font-weight: 800; color: var(--text-muted); text-transform: capitalize; opacity: 0.88; }
         .heatmap-cell .hm-dm { font-size: clamp(0.45rem, 0.85vw, 0.72rem); line-height: 1.05; font-weight: 800; color: var(--text-main); }
         .heatmap-cell:hover { transform: scale(1.08); z-index: 2; box-shadow: 0 0 14px rgba(199, 125, 255, 0.35); }
-        .heatmap-cell.lvl-1 { background: rgba(76, 201, 240, 0.2); border-color: rgba(76, 201, 240, 0.2); }
-        .heatmap-cell.lvl-2 { background: rgba(199, 125, 255, 0.22); border-color: rgba(199, 125, 255, 0.25); }
-        .heatmap-cell.lvl-3 { background: rgba(76, 201, 240, 0.42); box-shadow: 0 0 10px rgba(76, 201, 240, 0.25); }
-        .heatmap-cell.lvl-4 { background: linear-gradient(135deg, rgba(76,201,240,0.55), rgba(199,125,255,0.55)); box-shadow: 0 0 12px rgba(199, 125, 255, 0.35); }
-        .heatmap-cell.no-data { opacity: 0.38; }
+        .heatmap-cell.lvl-1 { border-color: rgba(76, 201, 240, 0.2); }
+        .heatmap-cell.lvl-2 { border-color: rgba(199, 125, 255, 0.25); }
+        .heatmap-cell.lvl-3 { border-color: rgba(76, 201, 240, 0.35); }
+        .heatmap-cell.lvl-4 { border-color: rgba(199, 125, 255, 0.45); }
+        .heatmap-cell.no-data { opacity: 0.28; filter: grayscale(0.2); }
 
         /* Demais gráficos: grid 2 colunas (PC), células iguais — exceto heatmap */
         .dashboard-charts-grid {
@@ -593,6 +866,7 @@
 
         .modal.modal-wide { width: min(720px, 96vw); max-height: 90vh; overflow: hidden; display: flex; flex-direction: column; }
         .modal.modal-wide .modal-body { overflow: hidden; display: flex; flex-direction: column; min-height: 0; }
+        .modal.modal-codex { width: min(1180px, 96vw); max-height: 90vh; overflow: hidden; display: flex; flex-direction: column; padding: 22px; }
 
         /* Toasts & Modals */
         #toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
@@ -612,6 +886,7 @@
         .achievement-info h4 { margin-bottom: 6px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
         .achievement-info p { font-size: 0.84rem; color: var(--text-muted); }
         .achievement .badge-volatile { font-size: 0.65rem; font-weight: 800; letter-spacing: 0.6px; text-transform: uppercase; padding: 3px 8px; border-radius: 999px; border: 1px solid rgba(255,184,107,0.35); color: var(--neon-orange); background: rgba(255,184,107,0.08); }
+        .achievement .badge-daily { font-size: 0.65rem; font-weight: 800; letter-spacing: 0.6px; text-transform: uppercase; padding: 3px 8px; border-radius: 999px; border: 1px solid rgba(92, 240, 216, 0.35); color: var(--neon-green); background: rgba(92, 240, 216, 0.08); }
         .achievement.volatile-active { opacity: 1; filter: grayscale(0); border-color: rgba(199, 125, 255, 0.4); box-shadow: 0 0 20px rgba(199, 125, 255, 0.12); }
         .achievement.volatile-inactive { opacity: 0.45; filter: grayscale(0.85); }
 
@@ -737,6 +1012,33 @@
             #tab-secoes .section-header { gap: 10px; align-items: flex-start; }
             #tab-secoes .section-title { width: 100%; font-size: 0.95rem; }
             #tab-secoes .section-title .cat-label { align-self: flex-start; }
+
+            /* Configurações (mobile) */
+            #tab-configuracoes .grid-cards { grid-template-columns: 1fr !important; }
+            #tab-configuracoes .card { padding: 18px; }
+            #tab-configuracoes input[type="range"] { width: 100%; min-width: 0 !important; }
+            #tab-configuracoes .categories-manage .category-row { flex-direction: column; align-items: stretch; }
+            #tab-configuracoes .categories-manage .cat-actions { justify-content: flex-start; }
+            #tab-configuracoes #progression-controls > div { flex-direction: column; align-items: stretch; }
+            #tab-configuracoes #progression-controls span { text-align: left !important; min-width: 0 !important; }
+
+            /* Códice de Títulos (mobile): 1 card por vez */
+            .modal.modal-codex { width: 96vw; padding: 16px; }
+            .level-codex-grid {
+                display: grid;
+                grid-auto-flow: column;
+                grid-auto-columns: 100%;
+                grid-template-columns: none;
+                overflow-x: auto;
+                overflow-y: hidden;
+                scroll-snap-type: x mandatory;
+                -webkit-overflow-scrolling: touch;
+                padding-right: 0;
+                padding-bottom: 8px;
+                max-height: none;
+            }
+            .level-card { scroll-snap-align: start; }
+            .level-card .lvl-name { min-height: 0; }
         }
     </style>
 </head>
@@ -860,7 +1162,12 @@
                 </div>
             </div>
 
-            <h3 style="margin: 30px 0 15px 0;">Conquistas</h3>
+            <div style="display:flex; align-items:center; justify-content:space-between; gap: 12px; flex-wrap: wrap; margin: 30px 0 15px 0;">
+                <h3 style="margin: 0;">Conquistas</h3>
+                <button id="btn-toggle-achievements-unlocked" class="btn-primary" style="padding: 10px 14px;">
+                    <i class="fas fa-eye-slash"></i> Mostrar todas
+                </button>
+            </div>
             <div class="achievement-list" id="achievements-container">
                 </div>
         </div>
@@ -910,6 +1217,7 @@
                 <div class="card">
                     <h3>Progressão</h3>
                     <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">Defina a dificuldade da subida de nível. Menor valor = evolução mais rápida.</p>
+                    <div id="progression-controls" style="opacity: 0.65; filter: grayscale(0.25); pointer-events: none;">
                     <label for="level-xp-step" style="font-size: 0.85rem; color: var(--text-muted); display:block; margin-bottom:6px;">XP por nível (base)</label>
                     <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
                         <input type="range" id="level-xp-step" min="10" max="100" step="10" value="50" style="flex:1; min-width: 220px;">
@@ -920,7 +1228,19 @@
                         <input type="range" id="task-xp-step" min="10" max="100" step="10" value="10" style="flex:1; min-width: 220px;">
                         <span id="task-xp-step-value" class="text-neon-blue" style="font-weight:700; min-width: 70px; text-align:right;">10 XP</span>
                     </div>
+                    </div>
                     <p style="font-size: 0.78rem; color: var(--text-muted); margin-top: 10px;">A barra de XP e os níveis são recalculados automaticamente.</p>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end; margin-top: 12px;">
+                        <button type="button" id="btn-progression-edit" class="btn-primary" style="padding: 10px 14px;">
+                            <i class="fas fa-pen-to-square"></i> Editar
+                        </button>
+                        <button type="button" id="btn-progression-confirm" class="btn-primary" style="padding: 10px 14px; display:none;">
+                            <i class="fas fa-check"></i> Confirmar
+                        </button>
+                        <button type="button" id="btn-progression-cancel" class="btn-danger" style="padding: 10px 14px; display:none;">
+                            <i class="fas fa-xmark"></i> Cancelar
+                        </button>
+                    </div>
                 </div>
 
                 <div class="card">
@@ -992,10 +1312,12 @@
 
         const DEFAULT_SETTINGS = {
             levelXpStep: 50,
-            taskXp: 10
+            taskXp: 10,
+            showOnlyUnlockedAchievements: true,
+            levelThemeEnabled: true
         };
 
-        const LEVEL_TITLES_BY_BRACKET = [
+        const LEVEL_TITLES_BY_LEVEL = [
             'Novato Arcano','Aprendiz Lunar','Discípulo da Névoa','Escudeiro da Aurora','Guardião do Crepúsculo',
             'Sentinela Astral','Adepto Umbral','Vidente Noturno','Forjador de Hábitos','Condutor de Runas',
             'Arquiteto do Foco','Cavaleiro Etéreo','Mestre da Bruma','Oráculo da Disciplina','Lorde do Compasso',
@@ -1005,9 +1327,20 @@
             'Lenda da Madrugada','Arquimago da Ação','Vórtice da Disciplina','Almirante da Bravura','Monarca do Progresso',
             'Soberano do Foco','Colosso Celestial','Dragão do Compromisso','Mítico da Persistência','Eterno da Rotina',
             'Ascendente Infinito','Lorde do Firmamento','Mestre dos Mil Ecos','Sentinela do Infinito','Arconte das Estrelas',
-            'Supremo da Constância','Imperador do Cosmos','Avatar da Disciplina','Lenda Imortal','Soberano Absoluto'
+            'Supremo da Constância','Imperador do Cosmos','Avatar da Disciplina','Lenda Imortal','Soberano Absoluto',
+
+            'Guardião da Brasa','Tecelão de Rotas','Monge do Compasso','Sábio da Ampulheta','Oráculo do Foco',
+            'Cavaleiro do Silêncio','Arauto da Aurora','Patrono do Ritmo','Arquiteto de Constância','Sentinela da Rotina',
+            'Domador de Distrações','Mestre do Ânimo','Lâmina da Disciplina','Portador da Chama','Vigilante do Tempo',
+            'Navegante Astral','Curador da Vontade','Guardião do Código','Forjador de Metas','Alquimista da Persistência',
+            'Conjurador de Hábitos','Magistrado do Progresso','Bastião do Esforço','Aventureiro do Foco','Cavaleiro da Noite',
+            'Oráculo do Amanhã','Mestre do Fluxo','Lorde da Clareza','Comandante do Ritmo','Arconte do Crepúsculo',
+            'Titã da Constância','Paladino do Progresso','Sentinela do Eclipse','Arquimago do Fluxo','Imperador do Foco',
+            'Avatar do Ritmo','Lenda do Progresso','Soberano da Rotina','Colosso da Disciplina','Guardião do Infinito',
+            'Mítico do Amanhecer','Arconte das Runas','Monarca do Tempo','Eterno do Fluxo','Supremo da Vontade',
+            'Ascendente do Cosmos','Soberano do Firmamento','Arquiteto do Infinito','Lenda Celestial','Avatar Absoluto'
         ];
-        const LEVEL_ICONS_BY_BRACKET = [
+        const LEVEL_ICONS_BY_LEVEL = [
             'fa-seedling','fa-moon','fa-cloud-moon','fa-shield','fa-sun',
             'fa-star','fa-mask','fa-eye','fa-hammer','fa-scroll',
             'fa-compass','fa-chess-knight','fa-wind','fa-book-open','fa-drafting-compass',
@@ -1015,9 +1348,20 @@
             'fa-meteor','fa-hat-wizard','fa-gears','fa-chess-rook','fa-mountain',
             'fa-lightbulb','fa-chess-king','fa-ghost','fa-crown','fa-fire',
             'fa-dragon','fa-wand-magic-sparkles','fa-tornado','fa-anchor','fa-award',
-            'fa-bullseye','fa-globe','fa-dragon','fa-medal','fa-infinity',
-            'fa-star-of-life','fa-satellite','fa-wave-square','fa-shield-alt','fa-sun',
-            'fa-trophy','fa-crown','fa-user-astronaut','fa-chess-queen','fa-chess-king'
+            'fa-bullseye','fa-globe','fa-medal','fa-infinity','fa-star-of-life',
+            'fa-satellite','fa-wave-square','fa-user-astronaut','fa-chess-queen','fa-chess-king',
+            'fa-trophy','fa-crown','fa-fire-flame-curved','fa-shield','fa-gem',
+
+            'fa-fire','fa-route','fa-hourglass-half','fa-stopwatch','fa-crosshairs',
+            'fa-volume-xmark','fa-sun','fa-wave-square','fa-calendar-check','fa-list-check',
+            'fa-ban','fa-heart','fa-khanda','fa-fire','fa-clock',
+            'fa-star','fa-hand-holding-heart','fa-code','fa-flag-checkered','fa-flask',
+            'fa-wand-magic-sparkles','fa-chart-line','fa-shield-halved','fa-compass','fa-moon',
+            'fa-arrow-trend-up','fa-water','fa-eye','fa-chess-rook','fa-cloud-moon',
+            'fa-mountain','fa-award','fa-meteor','fa-hat-wizard','fa-crown',
+            'fa-wave-square','fa-trophy','fa-calendar-week','fa-gears','fa-shield-heart',
+            'fa-sun','fa-scroll','fa-hourglass','fa-infinity','fa-dragon',
+            'fa-satellite','fa-globe','fa-diagram-project','fa-star','fa-dragon'
         ];
         const ARCHIVE_SECTION_ID = 'sec-archived-completed';
 
@@ -1089,8 +1433,8 @@
             { id: 'v6', title: 'Fornalha', desc: 'Streak atual ≥ 14 dias.', icon: 'fa-fire-flame-simple' },
             { id: 'v7', title: 'Momentum Semanal', desc: 'Nos últimos 7 dias, média de conclusão ≥ 60%.', icon: 'fa-chart-area' },
             { id: 'v8', title: 'Semana Limpa', desc: 'Nos últimos 7 dias, você teve ao menos 5 dias com 100%.', icon: 'fa-broom' },
-            { id: 'v9', title: 'XP Hoje', desc: 'Você ganhou 30+ XP hoje.', icon: 'fa-bolt' },
-            { id: 'v10', title: 'XP Explosivo', desc: 'Você ganhou 80+ XP hoje.', icon: 'fa-burst' },
+            { id: 'v9', title: 'XP Hoje', desc: (s) => `Você ganhou ${10 * (s.taskXp || 10)}+ XP hoje.`, icon: 'fa-bolt' },
+            { id: 'v10', title: 'XP Explosivo', desc: (s) => `Você ganhou ${22 * (s.taskXp || 10)}+ XP hoje.`, icon: 'fa-burst' },
             { id: 'v11', title: 'Multitarefas', desc: 'Você concluiu 5+ tarefas hoje.', icon: 'fa-list-ul' },
             { id: 'v12', title: 'Turbo Hoje', desc: 'Você concluiu 10+ tarefas hoje.', icon: 'fa-rocket' },
             { id: 'v13', title: 'Categoria Líder', desc: 'Hoje, uma categoria concentra 60%+ das conclusões.', icon: 'fa-chart-pie' },
@@ -1112,6 +1456,157 @@
             { id: 'v29', title: 'Precisão', desc: 'Hoje você está entre 80% e 99% de conclusão.', icon: 'fa-bullseye' },
             { id: 'v30', title: 'Crescendo', desc: 'Nos últimos 3 dias, sua conclusão aumentou dia a dia.', icon: 'fa-arrow-trend-up' }
         ];
+
+        const DAILY_ACHIEVEMENTS_DEF = [
+            { id: 'd1', title: 'Primeira faísca', desc: 'Conclua 1 tarefa hoje.', icon: 'fa-wand-magic-sparkles' },
+            { id: 'd2', title: 'Trinca rápida', desc: 'Conclua 4 tarefas hoje.', icon: 'fa-bolt' },
+            { id: 'd3', title: 'Mão cheia', desc: 'Conclua 7 tarefas hoje.', icon: 'fa-hand' },
+            { id: 'd4', title: 'Modo turbo', desc: 'Conclua 14 tarefas hoje.', icon: 'fa-rocket' },
+            { id: 'd5', title: 'XP inicial', desc: (s) => `Ganhe ${5 * (s.taskXp || 10)}+ XP hoje.`, icon: 'fa-coins' },
+            { id: 'd6', title: 'XP firme', desc: (s) => `Ganhe ${12 * (s.taskXp || 10)}+ XP hoje.`, icon: 'fa-bolt' },
+            { id: 'd7', title: 'XP alto', desc: (s) => `Ganhe ${20 * (s.taskXp || 10)}+ XP hoje.`, icon: 'fa-burst' },
+            { id: 'd8', title: 'XP lendário', desc: (s) => `Ganhe ${35 * (s.taskXp || 10)}+ XP hoje.`, icon: 'fa-gem' },
+            { id: 'd9', title: 'Saindo do zero', desc: 'Tenha 1%+ de conclusão hoje.', icon: 'fa-arrow-up' },
+            { id: 'd10', title: 'Meio caminho', desc: 'Atinja 50%+ de conclusão hoje.', icon: 'fa-chart-simple' },
+            { id: 'd11', title: 'Quase lá', desc: 'Atinja 80%+ de conclusão hoje.', icon: 'fa-bullseye' },
+            { id: 'd12', title: 'Dia perfeito', desc: 'Atinja 100% de conclusão hoje (com tarefas).', icon: 'fa-circle-check' },
+            { id: 'd13', title: 'Sem pendências visíveis', desc: 'Tenha 0 tarefas visíveis pendentes hoje (com tarefas).', icon: 'fa-check' },
+            { id: 'd14', title: 'Variedade de seções', desc: 'Conclua tarefas em 2+ seções hoje.', icon: 'fa-sitemap' },
+            { id: 'd15', title: 'Três frentes', desc: 'Conclua tarefas em 3+ seções hoje.', icon: 'fa-diagram-project' },
+            { id: 'd16', title: 'Duas categorias', desc: 'Conclua tarefas em 2+ categorias hoje.', icon: 'fa-tags' },
+            { id: 'd17', title: 'Três categorias', desc: 'Conclua tarefas em 3+ categorias hoje.', icon: 'fa-layer-group' },
+            { id: 'd18', title: 'Dia denso', desc: 'Tenha 12+ tarefas visíveis hoje.', icon: 'fa-table-cells' },
+            { id: 'd19', title: 'Dia leve', desc: 'Tenha até 4 tarefas visíveis hoje (com tarefas).', icon: 'fa-feather' },
+            { id: 'd20', title: 'Leve e perfeito', desc: 'Até 4 tarefas visíveis e 100% hoje.', icon: 'fa-feather' },
+            { id: 'd21', title: 'Extra 1', desc: 'Conclua 1 tarefa extra (sem template) hoje.', icon: 'fa-plus' },
+            { id: 'd22', title: 'Extras 3', desc: 'Conclua 3 tarefas extras (sem template) hoje.', icon: 'fa-plus-circle' },
+            { id: 'd23', title: 'Sem ocultar', desc: 'Conclua o dia sem tarefas ocultas (com tarefas).', icon: 'fa-eye' },
+            { id: 'd24', title: 'Domingo ON', desc: 'Se for domingo, faça 50%+ hoje.', icon: 'fa-cloud-sun' },
+            { id: 'd25', title: 'Segunda guerreira', desc: 'Se for segunda, conclua 3+ tarefas hoje.', icon: 'fa-shield' },
+            { id: 'd26', title: 'Recuperação', desc: 'Ontem foi <50% e hoje é ≥50%.', icon: 'fa-bandage' },
+            { id: 'd27', title: 'Crescendo', desc: 'Últimos 3 dias: sua % aumentou dia a dia (com tarefas).', icon: 'fa-arrow-trend-up' },
+            { id: 'd28', title: 'Combinação rara', desc: 'Hoje: 80%+ e 8+ tarefas concluídas.', icon: 'fa-star' },
+            { id: 'd29', title: 'Ritmo constante', desc: (s) => `Hoje: 70%+ e ${15 * (s.taskXp || 10)}+ XP.`, icon: 'fa-chart-area' },
+            { id: 'd30', title: 'Quatro cantos (hoje)', desc: 'Hoje: conclua tarefas em 4+ categorias.', icon: 'fa-vector-square' }
+        ];
+
+        function getDayProgressSummary(dateStr) {
+            const day = state.history[dateStr] || { xp: 0, tasks: [] };
+            const visible = (day.tasks || []).filter(t => !t.hidden);
+            const total = visible.length;
+            const completed = visible.filter(t => t.completed).length;
+            const percent = total ? Math.round((completed / total) * 100) : 0;
+            const xp = Number(day.xp) || 0;
+            const completedTasks = visible.filter(t => t.completed);
+            const sectionsDone = new Set(completedTasks.map(t => t.sectionId).filter(Boolean));
+            const categoriesDone = new Set(completedTasks.map(t => t.categoryId).filter(Boolean));
+            const pending = total ? (total - completed) : 0;
+            const hasHidden = (day.tasks || []).some(t => t.hidden);
+            const extraCompleted = completedTasks.filter(t => !t.templateId).length;
+            return { day, visible, total, completed, percent, xp, sectionsDone, categoriesDone, pending, hasHidden, extraCompleted };
+        }
+
+        function ensureDailyAchievementsForDate(dateStr) {
+            if (!state.history[dateStr]) state.history[dateStr] = { xp: 0, tasks: [] };
+            if (!Array.isArray(state.history[dateStr].dailyAchievementsUnlocked)) {
+                state.history[dateStr].dailyAchievementsUnlocked = [];
+            }
+            return state.history[dateStr].dailyAchievementsUnlocked;
+        }
+
+        function unlockDailyAchievement(dateStr, id) {
+            const list = ensureDailyAchievementsForDate(dateStr);
+            if (!list.includes(id)) {
+                list.push(id);
+                const ach = DAILY_ACHIEVEMENTS_DEF.find(a => a.id === id);
+                if (ach) showToast(`<i class="fas fa-calendar-day"></i> Conquista diária: ${ach.title}`, 'success');
+                saveState();
+            }
+        }
+
+        function syncDailyAchievementsForDate(dateStr, checks) {
+            const list = ensureDailyAchievementsForDate(dateStr);
+            const prev = new Set(list);
+            const nextIds = Object.entries(checks).filter(([, ok]) => !!ok).map(([id]) => id);
+            const next = new Set(nextIds);
+
+            // Remove as que não cumprem mais
+            const filtered = list.filter(id => next.has(id));
+            // Adiciona as novas
+            nextIds.forEach(id => { if (!prev.has(id)) filtered.push(id); });
+
+            state.history[dateStr].dailyAchievementsUnlocked = filtered;
+
+            // Toast só para novas conquistas, sem spam quando perder/recuperar
+            nextIds.forEach(id => {
+                if (!prev.has(id)) {
+                    const ach = DAILY_ACHIEVEMENTS_DEF.find(a => a.id === id);
+                    if (ach) showToast(`<i class="fas fa-calendar-day"></i> Conquista diária: ${ach.title}`, 'success');
+                }
+            });
+        }
+
+        function evaluateDailyAchievementsForDate(dateStr) {
+            const today = getLocalYMD(new Date());
+            if (dateStr !== today) return;
+
+            const settings = ensureSettings();
+            const taskXp = Math.max(10, Math.min(100, Number(settings.taskXp) || DEFAULT_SETTINGS.taskXp));
+            const s = getDayProgressSummary(dateStr);
+            const dow = new Date(dateStr + 'T12:00:00').getDay();
+            const isSunday = dow === 0;
+            const isMonday = dow === 1;
+
+            const yDate = new Date(dateStr + 'T12:00:00');
+            yDate.setDate(yDate.getDate() - 1);
+            const ymdYesterday = getLocalYMD(yDate);
+            const y = getDayProgressSummary(ymdYesterday);
+
+            const threeDays = [];
+            for (let i = 2; i >= 0; i--) {
+                const d = new Date(dateStr + 'T12:00:00');
+                d.setDate(d.getDate() - i);
+                const ds = getLocalYMD(d);
+                const dsSum = getDayProgressSummary(ds);
+                threeDays.push(dsSum.total ? dsSum.percent : null);
+            }
+            const increasing3 = threeDays.every(v => typeof v === 'number') && (threeDays[0] < threeDays[1] && threeDays[1] < threeDays[2]);
+
+            const checks = {
+                d1: s.completed >= 1,
+                d2: s.completed >= 4,
+                d3: s.completed >= 7,
+                d4: s.completed >= 14,
+                d5: s.xp >= (5 * taskXp),
+                d6: s.xp >= (12 * taskXp),
+                d7: s.xp >= (20 * taskXp),
+                d8: s.xp >= (35 * taskXp),
+                d9: s.percent >= 1 && s.total > 0,
+                d10: s.percent >= 50 && s.total > 0,
+                d11: s.percent >= 80 && s.total > 0,
+                d12: s.percent === 100 && s.total > 0,
+                d13: s.total > 0 && s.pending === 0,
+                d14: s.sectionsDone.size >= 2,
+                d15: s.sectionsDone.size >= 3,
+                d16: s.categoriesDone.size >= 2,
+                d17: s.categoriesDone.size >= 3,
+                d18: s.total >= 12,
+                d19: s.total > 0 && s.total <= 4,
+                d20: s.total > 0 && s.total <= 4 && s.percent === 100,
+                d21: s.extraCompleted >= 1,
+                d22: s.extraCompleted >= 3,
+                d23: s.total > 0 && !s.hasHidden,
+                d24: isSunday && s.total > 0 && s.percent >= 50,
+                d25: isMonday && s.completed >= 3,
+                d26: (y.total > 0 && y.percent < 50) && (s.total > 0 && s.percent >= 50),
+                d27: increasing3,
+                d28: (s.total > 0 && s.percent >= 80 && s.completed >= 8),
+                d29: (s.total > 0 && s.percent >= 70 && s.xp >= (15 * taskXp)),
+                d30: s.categoriesDone.size >= 4
+            };
+            syncDailyAchievementsForDate(dateStr, checks);
+            saveState();
+        }
 
         function formatDatePtBR(dateStr) {
             const d = new Date(dateStr + 'T12:00:00');
@@ -1312,6 +1807,8 @@
         function evaluateVolatileAchievements() {
             const today = getLocalYMD(new Date());
             const day = state.history[today] || { xp: 0, tasks: [] };
+            const settings = ensureSettings();
+            const taskXp = Math.max(10, Math.min(100, Number(settings.taskXp) || DEFAULT_SETTINGS.taskXp));
             const vis = day.tasks.filter(t => !t.hidden);
             const total = vis.length;
             const comp = vis.filter(t => t.completed).length;
@@ -1415,8 +1912,8 @@
                 v6: state.user.streak >= 14,
                 v7: avg7 >= 60 && last7.length >= 5,
                 v8: perfectCount7 >= 5,
-                v9: day.xp >= 30,
-                v10: day.xp >= 80,
+                v9: day.xp >= (10 * taskXp),
+                v10: day.xp >= (22 * taskXp),
                 v11: comp >= 5,
                 v12: comp >= 10,
                 v13: comp > 0 && maxCat / comp >= 0.6,
@@ -1593,6 +2090,12 @@
             if (typeof state.settings.taskXp !== 'number' || Number.isNaN(state.settings.taskXp)) {
                 state.settings.taskXp = DEFAULT_SETTINGS.taskXp;
             }
+            if (typeof state.settings.showOnlyUnlockedAchievements !== 'boolean') {
+                state.settings.showOnlyUnlockedAchievements = DEFAULT_SETTINGS.showOnlyUnlockedAchievements;
+            }
+            if (typeof state.settings.levelThemeEnabled !== 'boolean') {
+                state.settings.levelThemeEnabled = DEFAULT_SETTINGS.levelThemeEnabled;
+            }
             state.settings.levelXpStep = Math.max(10, Math.min(100, state.settings.levelXpStep));
             return state.settings;
         }
@@ -1609,12 +2112,12 @@
             return { currBase, nextBase };
         }
         function getLevelTitle(level) {
-            const idx = Math.min(LEVEL_TITLES_BY_BRACKET.length - 1, Math.max(0, Math.floor((Math.max(1, level) - 1) / 2)));
-            return LEVEL_TITLES_BY_BRACKET[idx];
+            const idx = Math.min(LEVEL_TITLES_BY_LEVEL.length - 1, Math.max(0, Math.floor(Math.max(1, level) - 1)));
+            return LEVEL_TITLES_BY_LEVEL[idx];
         }
         function getLevelIcon(level) {
-            const idx = Math.min(LEVEL_ICONS_BY_BRACKET.length - 1, Math.max(0, Math.floor((Math.max(1, level) - 1) / 2)));
-            return LEVEL_ICONS_BY_BRACKET[idx] || 'fa-star';
+            const idx = Math.min(LEVEL_ICONS_BY_LEVEL.length - 1, Math.max(0, Math.floor(Math.max(1, level) - 1)));
+            return LEVEL_ICONS_BY_LEVEL[idx] || 'fa-star';
         }
         function recalculateUserLevel() {
             ensureSettings();
@@ -1643,6 +2146,11 @@
             content.className = 'modal';
             content.innerHTML = html;
             overlay.style.display = 'flex';
+
+            // Ajustes de layout por tipo de modal
+            if (content.querySelector('.level-codex')) {
+                content.classList.add('modal-codex');
+            }
             
             const cancelBtn = content.querySelector('.btn-cancel');
             if(cancelBtn) cancelBtn.onclick = closeModal;
@@ -1812,6 +2320,23 @@
             const progress = ((state.user.xp - bounds.currBase) / (bounds.nextBase - bounds.currBase)) * 100;
 
             document.getElementById('nav-xp-bar').style.width = `${Math.min(progress, 100)}%`;
+
+            applyTierTheme(state.user.level);
+        }
+
+        function applyTierTheme(level) {
+            ensureSettings();
+            const lvl = Math.max(1, Math.min(100, Number(level) || 1));
+            // Troca de visual ao atingir cada dezena: lvl 10 -> tier 2, lvl 20 -> tier 3, ..., lvl 100 -> tier 10
+            const tier = Math.max(1, Math.min(10, Math.floor(lvl / 10) + 1));
+            document.body.dataset.level = String(lvl);
+            if (state.settings.levelThemeEnabled) {
+                document.body.dataset.tier = String(tier);
+                document.body.classList.remove('level-theme-off');
+            } else {
+                delete document.body.dataset.tier;
+                document.body.classList.add('level-theme-off');
+            }
         }
 
         // --- LÓGICA DE DADOS (DIAS) ---
@@ -1958,8 +2483,91 @@
                 });
             });
 
+            document.getElementById('btn-toggle-achievements-unlocked').addEventListener('click', () => {
+                ensureSettings();
+                state.settings.showOnlyUnlockedAchievements = !state.settings.showOnlyUnlockedAchievements;
+                saveState();
+                updateAchievementsToggleButton();
+                if (document.getElementById('tab-dashboard').classList.contains('active')) renderDashboard();
+            });
+
+            const levelTitle = document.getElementById('nav-level-title');
+            if (levelTitle) {
+                levelTitle.classList.add('level-title-clickable');
+                levelTitle.title = 'Clique para ver o Codex de Títulos (1–100)';
+                levelTitle.addEventListener('click', () => openLevelCodex());
+            }
+
             // Delegation para ações em tarefas e seções
             document.addEventListener('click', handleDelegatedClicks);
+        }
+
+        function openLevelCodex() {
+            ensureSettings();
+            const curLevel = Math.max(1, Number(state.user?.level) || 1);
+            const total = Math.min(100, LEVEL_TITLES_BY_LEVEL.length, LEVEL_ICONS_BY_LEVEL.length);
+
+            const cards = Array.from({ length: total }, (_, i) => {
+                const lvl = i + 1;
+                const name = LEVEL_TITLES_BY_LEVEL[i];
+                const icon = LEVEL_ICONS_BY_LEVEL[i] || 'fa-star';
+                const isCurrent = lvl === curLevel;
+                return `
+                    <div class="level-card" style="${isCurrent ? 'border-color: rgba(92,240,216,0.38); box-shadow: 0 14px 44px rgba(0,0,0,0.35), 0 0 26px rgba(92,240,216,0.12);' : ''}">
+                        <div class="lvl-info">
+                            <div class="lvl-name">${name}</div>
+                            <div class="lvl-badge">Lvl ${lvl}</div>
+                            <div class="lvl-icon"><i class="fas ${icon}"></i></div>
+                            <div class="lvl-hint">${isCurrent ? 'Seu título atual' : (lvl < curLevel ? 'Já conquistado' : 'A conquistar')}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            openModal(`
+                <div class="level-codex">
+                    <div class="level-codex-header">
+                        <div>
+                            <h2>Códice de Títulos</h2>
+                            <div class="level-codex-sub">100 títulos (1 por nível) — estilo RPG / progressão</div>
+                        </div>
+                        <div class="actions" style="margin-top: 0;">
+                            <button id="btn-toggle-level-theme" class="tier-toggle-btn ${state.settings.levelThemeEnabled ? '' : 'is-off'}">
+                                <i class="fas ${state.settings.levelThemeEnabled ? 'fa-wand-magic-sparkles' : 'fa-moon'}"></i>
+                                ${state.settings.levelThemeEnabled ? 'Cores de Nível: Ligado' : 'Cores de Nível: Desligado'}
+                            </button>
+                            <button class="btn-primary btn-cancel">Fechar</button>
+                        </div>
+                    </div>
+                    <div class="level-codex-grid">
+                        ${cards}
+                    </div>
+                </div>
+            `);
+
+            const btnToggle = document.getElementById('btn-toggle-level-theme');
+            if (btnToggle) {
+                btnToggle.onclick = () => {
+                    state.settings.levelThemeEnabled = !state.settings.levelThemeEnabled;
+                    saveState();
+                    applyTierTheme(state.user.level);
+                    btnToggle.classList.toggle('is-off', !state.settings.levelThemeEnabled);
+                    btnToggle.innerHTML = `
+                        <i class="fas ${state.settings.levelThemeEnabled ? 'fa-wand-magic-sparkles' : 'fa-moon'}"></i>
+                        ${state.settings.levelThemeEnabled ? 'Cores de Nível: Ligado' : 'Cores de Nível: Desligado'}
+                    `;
+                    showToast(state.settings.levelThemeEnabled ? 'Cores por nível ativadas.' : 'Cores por nível desativadas.', 'info');
+                };
+            }
+        }
+
+        function updateAchievementsToggleButton() {
+            ensureSettings();
+            const btn = document.getElementById('btn-toggle-achievements-unlocked');
+            if (!btn) return;
+            btn.innerHTML = state.settings.showOnlyUnlockedAchievements
+                ? `<i class="fas fa-eye-slash"></i> Mostrar todas`
+                : `<i class="fas fa-eye"></i> Mostrar apenas atingidas`;
         }
 
         function changeDate(offset) {
@@ -2081,6 +2689,9 @@
                     debitXP(rollbackXp);
                     task.lastXpAward = 0;
                 }
+                if (currentDateStr === getLocalYMD(new Date())) {
+                    evaluateDailyAchievementsForDate(currentDateStr);
+                }
                 saveState();
                 renderDados();
             }
@@ -2093,6 +2704,9 @@
                 id: generateId(), templateId: null, sectionId: secId,
                 categoryId: sec.categoryId, title: title, completed: false, hidden: false
             });
+            if (currentDateStr === getLocalYMD(new Date())) {
+                evaluateDailyAchievementsForDate(currentDateStr);
+            }
             saveState();
             renderDados();
         }
@@ -2113,6 +2727,9 @@
                         task.xpDebitedByHidden = false;
                     }
                 }
+                if (currentDateStr === getLocalYMD(new Date())) {
+                    evaluateDailyAchievementsForDate(currentDateStr);
+                }
                 saveState();
                 renderDados();
             }
@@ -2128,6 +2745,9 @@
                 }
             }
             data.tasks = data.tasks.filter(t => t.id !== id);
+            if (currentDateStr === getLocalYMD(new Date())) {
+                evaluateDailyAchievementsForDate(currentDateStr);
+            }
             saveState();
             renderDados();
         }
@@ -2161,6 +2781,7 @@
         // 2. DASHBOARD
         function renderDashboard() {
             checkPermanentAchievementsFromStats();
+            evaluateDailyAchievementsForDate(getLocalYMD(new Date()));
             renderHeatmap();
             renderAchievements();
             renderCharts();
@@ -2183,6 +2804,7 @@
                 let title = `${dayName} ${dateStr}: Sem dados`;
                 let percentage = 0;
                 let summary = 'Nenhuma tarefa registrada';
+                let intensity = 0;
 
                 if(state.history[dateStr]) {
                     const tasks = state.history[dateStr].tasks.filter(t => !t.hidden);
@@ -2190,6 +2812,7 @@
                     const comp = tasks.filter(t => t.completed).length;
                     if(total > 0) {
                         percentage = Math.round((comp / total) * 100);
+                        intensity = Math.max(0, Math.min(1, percentage / 100));
                         if(comp / total > 0) lvl = 1;
                         if(comp / total >= 0.3) lvl = 2;
                         if(comp / total >= 0.7) lvl = 3;
@@ -2201,6 +2824,7 @@
                 
                 const cell = document.createElement('div');
                 cell.className = `heatmap-cell ${lvl > 0 ? 'lvl-'+lvl : 'no-data'}`;
+                cell.style.setProperty('--hm-i', String(intensity));
                 cell.title = title;
                 const hm = formatShortDayMonthPt(dateStr);
                 cell.innerHTML = `<span class="hm-dow">${hm.dow.replace('.', '')}</span><span class="hm-dm">${hm.dm}</span>`;
@@ -2230,33 +2854,71 @@
         function renderAchievements() {
             const container = document.getElementById('achievements-container');
             const vol = evaluateVolatileAchievements();
-            const permanentHtml = ACHIEVEMENTS_DEF.map(a => {
-                const unlocked = state.user.achievements.includes(a.id);
-                return `
-                <div class="achievement ${unlocked ? 'unlocked' : ''}">
-                    <i class="fas ${a.icon}"></i>
-                    <div class="achievement-info">
-                        <h4>${a.title}</h4>
-                        <p>${a.desc}</p>
-                    </div>
-                </div>`;
-            }).join('');
+            ensureSettings();
+            updateAchievementsToggleButton();
+
+            const today = getLocalYMD(new Date());
+            const dailyUnlocked = ensureDailyAchievementsForDate(today);
+            const showOnlyUnlocked = !!state.settings.showOnlyUnlockedAchievements;
+
+            const dailyHtml = `
+                <div style="grid-column: 1 / -1; margin: 10px 0 6px;">
+                    <h3 style="color: var(--text-muted); font-size: 1rem;">Conquistas diárias <span style="font-weight:500; font-size:0.85rem; color: var(--neon-green);">(resetam todo dia)</span></h3>
+                </div>
+                ${DAILY_ACHIEVEMENTS_DEF
+                    .filter(a => !showOnlyUnlocked || dailyUnlocked.includes(a.id))
+                    .map(a => {
+                        const unlocked = dailyUnlocked.includes(a.id);
+                        const desc = (typeof a.desc === 'function') ? a.desc(ensureSettings()) : a.desc;
+                        return `
+                        <div class="achievement ${unlocked ? 'unlocked' : ''}">
+                            <i class="fas ${a.icon}"></i>
+                            <div class="achievement-info">
+                                <h4>${a.title} <span class="badge-daily">Diária</span></h4>
+                                <p>${desc}</p>
+                            </div>
+                        </div>`;
+                    }).join('')}
+            `;
+
+            const permanentHtml = ACHIEVEMENTS_DEF
+                .filter(a => !showOnlyUnlocked || state.user.achievements.includes(a.id))
+                .map(a => {
+                    const unlocked = state.user.achievements.includes(a.id);
+                    const desc = (typeof a.desc === 'function') ? a.desc(ensureSettings()) : a.desc;
+                    return `
+                    <div class="achievement ${unlocked ? 'unlocked' : ''}">
+                        <i class="fas ${a.icon}"></i>
+                        <div class="achievement-info">
+                            <h4>${a.title}</h4>
+                            <p>${desc}</p>
+                        </div>
+                    </div>`;
+                }).join('');
 
             const volatileHtml = `
                 <div style="grid-column: 1 / -1; margin: 10px 0 6px;">
                     <h3 style="color: var(--text-muted); font-size: 1rem;">Conquistas voláteis <span style="font-weight:500; font-size:0.85rem; color: var(--neon-orange);">(mudam conforme seu desempenho atual)</span></h3>
                 </div>
-                ${vol.map(v => `
+                ${vol
+                    .filter(v => !showOnlyUnlocked || !!v.active)
+                    .map(v => `
                 <div class="achievement volatile ${v.active ? 'volatile-active' : 'volatile-inactive'}">
                     <i class="fas ${v.icon}"></i>
                     <div class="achievement-info">
                         <h4>${v.title} <span class="badge-volatile">Volátil</span></h4>
-                        <p>${v.desc}</p>
+                        <p>${(typeof v.desc === 'function') ? v.desc(ensureSettings()) : v.desc}</p>
                     </div>
                 </div>`).join('')}
             `;
 
-            container.innerHTML = permanentHtml + volatileHtml;
+            const globalHeader = `
+                <div style="grid-column: 1 / -1; margin: 12px 0 6px;">
+                    <h3 style="color: var(--text-muted); font-size: 1rem;">Conquistas globais <span style="font-weight:500; font-size:0.85rem; color: var(--neon-purple);">(eternas)</span></h3>
+                </div>
+            `;
+
+            container.innerHTML = dailyHtml + globalHeader + permanentHtml + volatileHtml;
         }
 
         function renderCharts() {
@@ -2831,37 +3493,99 @@
             const btnCancelEdit = document.getElementById('btn-cancel-edit-category');
             btnCancelEdit.onclick = () => resetCategoryForm();
 
+            const progressionControls = document.getElementById('progression-controls');
+            const btnProgEdit = document.getElementById('btn-progression-edit');
+            const btnProgConfirm = document.getElementById('btn-progression-confirm');
+            const btnProgCancel = document.getElementById('btn-progression-cancel');
+
             const levelStepInput = document.getElementById('level-xp-step');
             const levelStepLabel = document.getElementById('level-xp-step-value');
-            levelStepInput.value = String(state.settings.levelXpStep || DEFAULT_SETTINGS.levelXpStep);
-            levelStepLabel.textContent = `${levelStepInput.value} XP`;
-            levelStepInput.oninput = () => {
-                levelStepLabel.textContent = `${levelStepInput.value} XP`;
+            const taskXpInput = document.getElementById('task-xp-step');
+            const taskXpLabel = document.getElementById('task-xp-step-value');
+
+            let progressionEditing = false;
+            let prevProgressionSettings = null;
+
+            const clampStep = (v) => Math.max(10, Math.min(100, parseInt(v, 10) || 0));
+
+            const setProgressionEditMode = (on) => {
+                progressionEditing = !!on;
+                if (progressionControls) {
+                    progressionControls.style.pointerEvents = on ? 'auto' : 'none';
+                    progressionControls.style.opacity = on ? '1' : '0.65';
+                    progressionControls.style.filter = on ? 'none' : 'grayscale(0.25)';
+                }
+                if (levelStepInput) levelStepInput.disabled = !on;
+                if (taskXpInput) taskXpInput.disabled = !on;
+                if (btnProgEdit) btnProgEdit.style.display = on ? 'none' : 'inline-flex';
+                if (btnProgConfirm) btnProgConfirm.style.display = on ? 'inline-flex' : 'none';
+                if (btnProgCancel) btnProgCancel.style.display = on ? 'inline-flex' : 'none';
             };
-            levelStepInput.onchange = () => {
-                state.settings.levelXpStep = Math.max(10, Math.min(100, parseInt(levelStepInput.value, 10) || DEFAULT_SETTINGS.levelXpStep));
+
+            const applyProgressionPreview = () => {
+                const nextLevelStep = clampStep(levelStepInput.value) || (state.settings.levelXpStep || DEFAULT_SETTINGS.levelXpStep);
+                const nextTaskXp = clampStep(taskXpInput.value) || (state.settings.taskXp || DEFAULT_SETTINGS.taskXp);
+
+                levelStepInput.value = String(nextLevelStep);
+                taskXpInput.value = String(nextTaskXp);
+                levelStepLabel.textContent = `${levelStepInput.value} XP`;
+                taskXpLabel.textContent = `${taskXpInput.value} XP`;
+
+                state.settings.levelXpStep = nextLevelStep;
+                state.settings.taskXp = nextTaskXp;
+
+                recalculateXpFromHistory(state.settings.taskXp);
                 recalculateUserLevel();
-                saveState();
                 updateSidebar();
-                checkPermanentAchievementsFromStats();
-                showToast(`Dificuldade ajustada: ${state.settings.levelXpStep} XP por nível base.`, 'success');
+                renderDados();
                 if (document.getElementById('tab-dashboard').classList.contains('active')) renderDashboard();
             };
 
-            const taskXpInput = document.getElementById('task-xp-step');
-            const taskXpLabel = document.getElementById('task-xp-step-value');
+            // Inicializa valores
+            levelStepInput.value = String(state.settings.levelXpStep || DEFAULT_SETTINGS.levelXpStep);
+            levelStepLabel.textContent = `${levelStepInput.value} XP`;
             taskXpInput.value = String(state.settings.taskXp || DEFAULT_SETTINGS.taskXp);
             taskXpLabel.textContent = `${taskXpInput.value} XP`;
-            taskXpInput.oninput = () => {
-                taskXpLabel.textContent = `${taskXpInput.value} XP`;
+
+            // Bloqueado por padrão
+            setProgressionEditMode(false);
+
+            // Preview em tempo real enquanto edita
+            levelStepInput.oninput = () => { levelStepLabel.textContent = `${levelStepInput.value} XP`; if (progressionEditing) applyProgressionPreview(); };
+            taskXpInput.oninput = () => { taskXpLabel.textContent = `${taskXpInput.value} XP`; if (progressionEditing) applyProgressionPreview(); };
+
+            btnProgEdit.onclick = () => {
+                ensureSettings();
+                prevProgressionSettings = { levelXpStep: state.settings.levelXpStep, taskXp: state.settings.taskXp };
+                setProgressionEditMode(true);
+                applyProgressionPreview();
+                showToast('Editando progressão (pré-visualização em tempo real).', 'info');
             };
-            taskXpInput.onchange = () => {
-                state.settings.taskXp = Math.max(10, Math.min(100, parseInt(taskXpInput.value, 10) || DEFAULT_SETTINGS.taskXp));
+
+            btnProgCancel.onclick = () => {
+                if (!prevProgressionSettings) { setProgressionEditMode(false); return; }
+                state.settings.levelXpStep = prevProgressionSettings.levelXpStep;
+                state.settings.taskXp = prevProgressionSettings.taskXp;
+                levelStepInput.value = String(state.settings.levelXpStep);
+                taskXpInput.value = String(state.settings.taskXp);
+                levelStepLabel.textContent = `${levelStepInput.value} XP`;
+                taskXpLabel.textContent = `${taskXpInput.value} XP`;
                 recalculateXpFromHistory(state.settings.taskXp);
-                saveState();
-                showToast(`XP por atividade ajustado para ${state.settings.taskXp}.`, 'success');
+                recalculateUserLevel();
+                updateSidebar();
                 renderDados();
                 if (document.getElementById('tab-dashboard').classList.contains('active')) renderDashboard();
+                setProgressionEditMode(false);
+                prevProgressionSettings = null;
+                showToast('Alterações canceladas. Configuração anterior restaurada.', 'info');
+            };
+
+            btnProgConfirm.onclick = () => {
+                setProgressionEditMode(false);
+                prevProgressionSettings = null;
+                saveState();
+                checkPermanentAchievementsFromStats();
+                showToast(`Progressão atualizada: ${state.settings.levelXpStep} XP/nível e ${state.settings.taskXp} XP/atividade.`, 'success');
             };
 
             // Exportar

@@ -663,6 +663,65 @@
         button.btn-danger { background: transparent; border: 1px solid rgba(244, 114, 182, 0.4); color: var(--neon-pink); }
         button.btn-danger:hover { background: rgba(244, 114, 182, 0.12); color: #fff; box-shadow: 0 0 18px rgba(244, 114, 182, 0.2); }
 
+        .install-banner {
+            position: fixed;
+            inset: auto 16px 16px;
+            left: 16px;
+            right: 16px;
+            z-index: 9999;
+            display: grid;
+            place-items: center;
+            pointer-events: none;
+        }
+        .install-banner-content {
+            width: min(100%, 760px);
+            background: rgba(8, 14, 28, 0.96);
+            border: 1px solid rgba(76, 201, 240, 0.4);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+            border-radius: 18px;
+            backdrop-filter: blur(12px);
+            color: var(--text-main);
+            padding: 18px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            pointer-events: auto;
+        }
+        .install-banner.hidden { display: none; }
+        .install-banner-text {
+            display: grid;
+            gap: 4px;
+            min-width: 0;
+        }
+        .install-banner-text strong {
+            font-size: 1rem;
+            letter-spacing: 0.03em;
+        }
+        .install-banner-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: flex-end;
+            align-items: center;
+        }
+        .install-banner-actions button {
+            border-radius: 999px;
+            min-width: 120px;
+            font-weight: 600;
+        }
+        .install-banner-actions button#install-close-button {
+            min-width: auto;
+            width: 44px;
+            height: 44px;
+            padding: 0;
+            border-radius: 50%;
+            font-size: 1.3rem;
+            line-height: 1;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
         /* Data View */
         .date-selector { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 10px; }
         
@@ -2639,7 +2698,7 @@
             if(percent === 100 && totalTasks > 0) unlockAchievement('a2');
 
             // Renderiza seções (mesmo as vazias, buscando do state.sections)
-            state.sections.forEach(sec => {
+            state.sections.filter(sec => sec.id !== ARCHIVE_SECTION_ID).forEach(sec => {
                 const tasks = tasksBySec[sec.id] || [];
                 const cat = getCategory(sec.categoryId);
                 
@@ -3701,7 +3760,81 @@
         document.addEventListener('DOMContentLoaded', init);
 
     </script>
+
+    <div id="install-banner" class="install-banner hidden" role="status" aria-live="polite">
+        <div class="install-banner-content">
+            <div class="install-banner-text">
+                <strong>Instale NocturnalFlow como aplicativo</strong>
+                <span>Abra o app diretamente e mantenha-o disponível offline. Clique em instalar para adicionar.</span>
+            </div>
+            <div class="install-banner-actions">
+                <button id="install-app-button" class="btn-primary">Instalar</button>
+                <button id="install-never-button" class="btn-danger">Nunca mais mostrar</button>
+                <button id="install-close-button" aria-label="Fechar">×</button>
+            </div>
+        </div>
+    </div>
+
     <script>
+        const INSTALL_PROMPT_KEY = 'nocturnalFlowInstallPromptNeverShow';
+        let deferredPrompt = null;
+
+        const installBanner = document.getElementById('install-banner');
+        const installButton = document.getElementById('install-app-button');
+        const neverShowButton = document.getElementById('install-never-button');
+        const closeInstallButton = document.getElementById('install-close-button');
+
+        function canShowInstallPrompt() {
+            const isStandAlone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+            const neverShow = localStorage.getItem(INSTALL_PROMPT_KEY);
+            return !isStandAlone && !neverShow;
+        }
+
+        function showInstallBanner() {
+            if (!installBanner) return;
+            installBanner.classList.remove('hidden');
+        }
+
+        function hideInstallBanner() {
+            if (!installBanner) return;
+            installBanner.classList.add('hidden');
+        }
+
+        window.addEventListener('beforeinstallprompt', event => {
+            if (!canShowInstallPrompt()) return;
+            event.preventDefault();
+            deferredPrompt = event;
+            showInstallBanner();
+        });
+
+        window.addEventListener('appinstalled', () => {
+            deferredPrompt = null;
+            hideInstallBanner();
+            localStorage.removeItem(INSTALL_PROMPT_KEY);
+            console.log('NocturnalFlow instalado como app');
+        });
+
+        installButton?.addEventListener('click', async () => {
+            if (!deferredPrompt) return;
+            deferredPrompt.prompt();
+            const choiceResult = await deferredPrompt.userChoice;
+            if (choiceResult.outcome === 'accepted') {
+                hideInstallBanner();
+            } else {
+                hideInstallBanner();
+            }
+            deferredPrompt = null;
+        });
+
+        closeInstallButton?.addEventListener('click', () => {
+            hideInstallBanner();
+        });
+
+        neverShowButton?.addEventListener('click', () => {
+            localStorage.setItem(INSTALL_PROMPT_KEY, '1');
+            hideInstallBanner();
+        });
+
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/service-worker.js')

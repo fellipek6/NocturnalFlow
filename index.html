@@ -795,7 +795,7 @@
             margin-bottom: 20px;
             padding: 16px;
             border: 1px solid rgba(76, 201, 240, 0.1);
-            max-height: min(85vh, 900px);
+            max-height: min(95vh, 1000px);
             overflow: hidden;
             display: flex;
             flex-direction: column;
@@ -804,7 +804,7 @@
         .section-block .task-list {
             flex: 1;
             min-height: 120px;
-            max-height: min(52vh, 560px);
+            max-height: min(65vh, 700px);
             overflow-y: auto;
             overflow-x: hidden;
             padding-right: 8px;
@@ -1003,8 +1003,8 @@
         .toast { background: var(--bg-card); color: var(--text-main); padding: 12px 20px; border-radius: 4px; border-left: 4px solid var(--neon-blue); box-shadow: 0 4px 10px rgba(0,0,0,0.5); animation: slideIn 0.3s forwards; }
         @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
 
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(2px); }
-        .modal { background: linear-gradient(160deg, rgba(15, 25, 50, 0.98), rgba(10, 16, 35, 0.98)); padding: 30px; border-radius: var(--border-radius); width: 400px; max-width: 90%; border: 1px solid rgba(199, 125, 255, 0.35); box-shadow: 0 0 40px rgba(124, 58, 237, 0.25), 0 0 80px rgba(0, 0, 0, 0.5); }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 9998; backdrop-filter: blur(2px); }
+        .modal { background: linear-gradient(160deg, rgba(15, 25, 50, 0.98), rgba(10, 16, 35, 0.98)); padding: 30px; border-radius: var(--border-radius); width: 400px; max-width: 90%; border: 1px solid rgba(199, 125, 255, 0.35); box-shadow: 0 0 40px rgba(124, 58, 237, 0.25), 0 0 80px rgba(0, 0, 0, 0.5); z-index: 9999; position: relative; }
         .modal h2 { margin-bottom: 20px; }
         .modal .actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
 
@@ -1441,6 +1441,9 @@
 
     <div class="modal-overlay" id="modal-overlay">
         <div class="modal" id="modal-content"></div>
+    </div>
+    <div class="modal-overlay" id="modal-overlay-secondary" style="z-index: 10001;">
+        <div class="modal" id="modal-content-secondary"></div>
     </div>
 
     <div id="toast-container"></div>
@@ -2345,13 +2348,28 @@
             const confirmBtn = content.querySelector('.btn-confirm');
             if(confirmBtn && onConfirm) confirmBtn.onclick = () => { onConfirm(); closeModal(); };
         }
+
+        function openModalSecondary(html, onConfirm) {
+            const overlay = document.getElementById('modal-overlay-secondary');
+            const content = document.getElementById('modal-content-secondary');
+            content.className = 'modal';
+            content.innerHTML = html;
+            overlay.style.display = 'flex';
+            
+            const cancelBtn = content.querySelector('.btn-cancel');
+            if(cancelBtn) cancelBtn.onclick = closeModalSecondary;
+            
+            const confirmBtn = content.querySelector('.btn-confirm');
+            if(confirmBtn && onConfirm) confirmBtn.onclick = () => { onConfirm(); closeModalSecondary(); };
+        }
+
+        function closeModalSecondary() {
+            document.getElementById('modal-overlay-secondary').style.display = 'none';
+            document.getElementById('modal-content-secondary').className = 'modal';
+        }
         function closeModal() {
             document.getElementById('modal-overlay').style.display = 'none';
             document.getElementById('modal-content').className = 'modal';
-            // Resetar o estado do hamburguer após fechar modal (bug do X não voltar para ☰)
-            if (isMobileNavLayout()) {
-                setMobileNavOpen(false);
-            }
         }
 
         function updateCategoryIconPreview() {
@@ -2715,7 +2733,7 @@
             const tierInfo = Math.floor((lvl - 1) / 10) + 1;
             const tierLabel = ['Iniciante', 'Aprendiz', 'Intermediário', 'Avançado', 'Experiente', 'Veterano', 'Mestre', 'Lendário', 'Épico', 'Supremo'][Math.min(tierInfo - 1, 9)];
             
-            openModal(`
+            openModalSecondary(`
                 <div style="display: flex; flex-direction: column; gap: 20px;">
                     <div style="text-align: center; padding-bottom: 20px; border-bottom: 1px solid rgba(199, 125, 255, 0.2);">
                         <i class="fas ${icon}" style="font-size: 3.5rem; color: ${tierColor}; margin-bottom: 12px; display: block; text-shadow: 0 0 20px ${tierColor}80;"></i>
@@ -2795,12 +2813,27 @@
                         const name = LEVEL_TITLES_BY_LEVEL[i];
                         const icon = LEVEL_ICONS_BY_LEVEL[i] || 'fa-star';
                         const isCurrent = lvl === curLevel;
+                        const isCompleted = lvl < curLevel;
                         const tierColor = getTierColorForLevel(lvl);
                         const targetXP = getLevelTargetXP(lvl);
                         const progress = getLevelProgressForLevel(lvl);
-                        const statusLabel = isCurrent ? 'Seu título atual' : (lvl < curLevel ? 'Já conquistado' : 'A conquistar');
+                        const statusLabel = isCurrent ? 'Seu título atual' : (isCompleted ? 'Já conquistado' : 'A conquistar');
+                        
+                        // Estilo verde vibrante para cards concluídos e nível atual
+                        const cardStyle = isCompleted 
+                            ? `border-color: #00ff8844; box-shadow: 0 20px 50px #00ff8833, 0 0 30px #00ff8822, inset 0 0 25px #00ff8818;`
+                            : isCurrent
+                                ? `border-color: #00ff8866; box-shadow: 0 25px 60px #00ff8844, 0 0 40px #00ff8833, inset 0 0 30px #00ff8822;`
+                                : `border-color: ${tierColor}33; box-shadow: 0 18px 42px ${tierColor}22, inset 0 0 22px ${tierColor}14;`;
+                        
+                        const progressStyle = isCompleted
+                            ? `background: linear-gradient(90deg, #00ff88, #00ff66, #00ff88); box-shadow: 0 0 20px #00ff8844;`
+                            : isCurrent
+                                ? `background: linear-gradient(90deg, #00ff88, #00ff44, #00ff88); box-shadow: 0 0 25px #00ff8866;`
+                                : `background: linear-gradient(90deg, ${tierColor}cc, ${tierColor}, ${tierColor}bb);`;
+                        
                         cardLines.push(`
-                            <div class="level-card" style="border-color: ${tierColor}33; box-shadow: 0 18px 42px ${tierColor}22, inset 0 0 22px ${tierColor}14;">
+                            <div class="level-card ${isCompleted ? 'completed' : ''}" style="${cardStyle}">
                                 <div class="lvl-info">
                                     <div class="lvl-name">${name}</div>
                                     <div class="lvl-badge">Lvl ${lvl}</div>
@@ -2810,7 +2843,7 @@
                                 <div class="lvl-details">
                                     <div class="lvl-details-row"><strong>XP atual</strong><span>${Math.max(0, state.user?.xp || 0)} XP</span></div>
                                     <div class="lvl-details-row"><strong>Meta do título</strong><span>${lvl <= 1 ? '0 XP' : `${targetXP} XP`}</span></div>
-                                    <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: ${progress}%; background: linear-gradient(90deg, ${tierColor}cc, ${tierColor}, ${tierColor}bb);"></div></div>
+                                    <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: ${progress}%; ${progressStyle}"></div></div>
                                     <div class="lvl-detail-note">${lvl <= 1 ? 'Título inicial já desbloqueado.' : `Progresso atual para este título: ${progress}%`}</div>
                                 </div>
                             </div>
@@ -2894,11 +2927,6 @@
         }
 
         function openLevelCodex() {
-
-            // Fechar menu hamburger no mobile ao abrir o Códice
-            if (window.innerWidth <= 1024) {
-                closeMobileNav();
-            }
             ensureSettings();
             const curLevel = Math.max(1, Number(state.user?.level) || 1);
             const total = Math.min(100, LEVEL_TITLES_BY_LEVEL.length, LEVEL_ICONS_BY_LEVEL.length);
@@ -2912,13 +2940,28 @@
                 const name = LEVEL_TITLES_BY_LEVEL[i];
                 const icon = LEVEL_ICONS_BY_LEVEL[i] || 'fa-star';
                 const isCurrent = lvl === curLevel;
+                    const isCompleted = lvl < curLevel;
                     const tierColor = getTierColorForLevel(lvl);
                     const targetXP = getLevelTargetXP(lvl);
                     const progress = getLevelProgressForLevel(lvl);
-                    const statusLabel = isCurrent ? 'Seu título atual' : (lvl < curLevel ? 'Já conquistado' : 'A conquistar');
+                    const statusLabel = isCurrent ? 'Seu título atual' : (isCompleted ? 'Já conquistado' : 'A conquistar');
                     const progressText = lvl <= 1 ? 'Título inicial desbloqueado' : `${Math.min(Math.max(0, state.user?.xp || 0), targetXP)} / ${targetXP} XP`;
+                    
+                    // Estilo verde vibrante para cards concluídos e nível atual
+                    const cardStyle = isCompleted 
+                        ? `border-color: #00ff8844; box-shadow: 0 20px 50px #00ff8833, 0 0 30px #00ff8822, inset 0 0 25px #00ff8818;`
+                        : isCurrent
+                            ? `border-color: #00ff8866; box-shadow: 0 25px 60px #00ff8844, 0 0 40px #00ff8833, inset 0 0 30px #00ff8822;`
+                            : `border-color: ${tierColor}33; box-shadow: 0 18px 42px ${tierColor}22, inset 0 0 22px ${tierColor}14;`;
+                    
+                    const progressStyle = isCompleted
+                        ? `background: linear-gradient(90deg, #00ff88, #00ff66, #00ff88); box-shadow: 0 0 20px #00ff8844;`
+                        : isCurrent
+                            ? `background: linear-gradient(90deg, #00ff88, #00ff44, #00ff88); box-shadow: 0 0 25px #00ff8866;`
+                            : `background: linear-gradient(90deg, ${tierColor}cc, ${tierColor}, ${tierColor}bb);`;
+                    
                     return `
-                        <div class="level-card" style="border-color: ${tierColor}33; box-shadow: 0 18px 42px ${tierColor}22, inset 0 0 22px ${tierColor}14;">
+                        <div class="level-card ${isCompleted ? 'completed' : ''}" style="${cardStyle}">
                             <div class="lvl-info">
                                 <div class="lvl-name">${name}</div>
                                 <div class="lvl-badge">Lvl ${lvl}</div>
@@ -2928,7 +2971,7 @@
                             <div class="lvl-details">
                                 <div class="lvl-details-row"><strong>XP atual</strong><span>${Math.max(0, state.user?.xp || 0)} XP</span></div>
                                 <div class="lvl-details-row"><strong>Meta do título</strong><span>${lvl <= 1 ? '0 XP' : `${targetXP} XP`}</span></div>
-                                <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: ${progress}%; background: linear-gradient(90deg, ${tierColor}cc, ${tierColor}, ${tierColor}bb);"></div></div>
+                                <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: ${progress}%; ${progressStyle}"></div></div>
                                 <div class="lvl-detail-note">${lvl <= 1 ? 'Título inicial já desbloqueado.' : `Progresso atual para este título: ${progress}%`}</div>
                             </div>
                         </div>
@@ -3695,7 +3738,8 @@
                             `}
                         </div>
                         
-                        <div style="margin-bottom: 15px; display:grid; gap: 12px;">
+                        <div style="margin-bottom: 15px; max-height: 400px; overflow-y: auto; overflow-x: hidden; padding-right: 8px;">
+                            <div style="display:grid; gap: 12px;">
                             ${temps.map(t => `
                                 <div class="task-item template-item" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);">
                                     <div class="template-info">
@@ -3710,6 +3754,7 @@
                                     </div>
                                 </div>
                             `).join('')}
+                            </div>
                         </div>
 
                         ${sec.id === ARCHIVE_SECTION_ID ? '' : `

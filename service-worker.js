@@ -1,9 +1,9 @@
 const CACHE_NAME = 'nocturnalflow-v1';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/service-worker.js',
+  './',
+  './index.html',
+  './manifest.json',
+  './service-worker.js',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
   'https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&display=swap',
   'https://i.imgur.com/qGogLhI.png',

@@ -146,8 +146,22 @@
         body[data-tier="6"]  { --tier-intensity: 0.58; --tier-aura: 0.16; --tier-aura2: 0.14; --tier-aura3: 0.10; --tier-bg-a: rgba(154,94,242,0.26); --tier-bg-b: rgba(70,196,229,0.16); --tier-bg-c: #0b1538; --tier-card-radius-boost: 2px; --tier-hue: 90deg; --tier-sat: 1.24; --tier-bright: 1.06; }
         body[data-tier="7"]  { --tier-intensity: 0.72; --tier-aura: 0.18; --tier-aura2: 0.16; --tier-aura3: 0.12; --tier-bg-a: rgba(164,96,248,0.28); --tier-bg-b: rgba(76,208,233,0.18); --tier-bg-c: #0b173d; --tier-card-radius-boost: 3px; --tier-hue: 110deg; --tier-sat: 1.28; --tier-bright: 1.07; }
         body[data-tier="8"]  { --tier-intensity: 0.84; --tier-aura: 0.20; --tier-aura2: 0.18; --tier-aura3: 0.14; --tier-bg-a: rgba(176,102,252,0.30); --tier-bg-b: rgba(88,220,238,0.20); --tier-bg-c: #0b1942; --tier-card-radius-boost: 3px; --tier-hue: 130deg; --tier-sat: 1.32; --tier-bright: 1.08; }
-        body[data-tier="9"]  { --tier-intensity: 0.93; --tier-aura: 0.22; --tier-aura2: 0.20; --tier-aura3: 0.16; --tier-bg-a: rgba(188,110,255,0.33); --tier-bg-b: rgba(98,230,242,0.22); --tier-bg-c: #0b1b48; --tier-card-radius-boost: 4px; --tier-hue: 148deg; --tier-sat: 1.36; --tier-bright: 1.09; }
-        body[data-tier="10"] { --tier-intensity: 1; --tier-aura: 0.24; --tier-aura2: 0.22; --tier-aura3: 0.18; --tier-bg-a: rgba(204,118,255,0.38); --tier-bg-b: rgba(118,238,245,0.26); --tier-bg-c: #0c1e52; --tier-card-radius-boost: 5px; --tier-hue: 165deg; --tier-sat: 1.42; --tier-bright: 1.11; }
+        body[data-tier="9"]  { --tier-intensity: 0.93; --tier-aura: 0.22; --tier-aura2: 0.20; --tier-aura3: 0.16; --tier-bg-a: rgba(220,20,60,0.33); --tier-bg-b: rgba(255,69,0,0.22); --tier-bg-c: #2a0a0a; --tier-card-radius-boost: 4px; --tier-hue: 0deg; --tier-sat: 1.36; --tier-bright: 1.09; }
+        body[data-tier="10"] { --tier-intensity: 1; --tier-aura: 0.24; --tier-aura2: 0.22; --tier-aura3: 0.18; --tier-bg-a: rgba(220,20,60,0.38); --tier-bg-b: rgba(255,215,0,0.26); --tier-bg-c: #4a0f0f; --tier-card-radius-boost: 5px; --tier-hue: 0deg; --tier-sat: 1.42; --tier-bright: 1.11; }
+
+        /* Estilo especial para o nível 100 - Vermelho Escarlate com Ouro */
+        body[data-level="100"] {
+            --tier-intensity: 1.15;
+            --tier-aura: 0.28;
+            --tier-aura2: 0.26;
+            --tier-aura3: 0.22;
+        }
+        body[data-level="100"]::before {
+            background: radial-gradient(900px 520px at 8% 0%, rgba(220, 20, 60, var(--tier-aura)), transparent 60%), radial-gradient(820px 520px at 100% 10%, rgba(255, 215, 0, var(--tier-aura2)), transparent 58%), radial-gradient(900px 700px at 55% 105%, rgba(255, 69, 0, var(--tier-aura3)), transparent 62%);
+        }
+        body[data-level="100"]::after {
+            background: conic-gradient(from 200deg at 50% 40%, rgba(220, 20, 60, calc(0.02 + (0.10 * var(--tier-intensity)))), rgba(255, 215, 0, calc(0.02 + (0.12 * var(--tier-intensity)))), rgba(255, 69, 0, calc(0.02 + (0.10 * var(--tier-intensity)))), rgba(220, 20, 60, calc(0.01 + (0.08 * var(--tier-intensity)))), rgba(255, 215, 0, calc(0.02 + (0.10 * var(--tier-intensity)))));
+        }
 
         body.level-theme-off::before,
         body.level-theme-off::after {
@@ -1509,7 +1523,7 @@
             'fa-mountain','fa-award','fa-meteor','fa-hat-wizard','fa-crown',
             'fa-wave-square','fa-trophy','fa-calendar-week','fa-gears','fa-shield-heart',
             'fa-sun','fa-scroll','fa-hourglass','fa-infinity','fa-dragon',
-            'fa-satellite','fa-globe','fa-diagram-project','fa-star','fa-dragon'
+            'fa-satellite','fa-globe','fa-diagram-project','fa-star','fa-crown'
         ];
         const ARCHIVE_SECTION_ID = 'sec-archived-completed';
 
@@ -2268,6 +2282,8 @@
             return LEVEL_ICONS_BY_LEVEL[idx] || 'fa-star';
         }
         function getTierColorForLevel(level) {
+            if (level === 100) return '#8b0000'; // Vermelho escarlate para nível 100
+            if (level >= 91 && level <= 99) return '#dc143c'; // Vermelho para níveis 91-99
             const colors = ['#7c3aed', '#3b82f6', '#0ea5e9', '#8b5cf6', '#f97316', '#22d3ee', '#a855f7', '#14b8a6', '#f472b6', '#38bdf8'];
             const index = Math.min(colors.length - 1, Math.max(0, Math.floor((Math.max(1, level) - 1) / 10)));
             return colors[index];
@@ -2332,6 +2348,10 @@
         function closeModal() {
             document.getElementById('modal-overlay').style.display = 'none';
             document.getElementById('modal-content').className = 'modal';
+            // Resetar o estado do hamburguer após fechar modal (bug do X não voltar para ☰)
+            if (isMobileNavLayout()) {
+                setMobileNavOpen(false);
+            }
         }
 
         function updateCategoryIconPreview() {
@@ -2673,14 +2693,219 @@
             document.addEventListener('click', handleDelegatedClicks);
         }
 
+        function openLevelDetailModal(level) {
+            ensureSettings();
+            const lvl = Math.max(1, Math.min(100, level));
+            const name = LEVEL_TITLES_BY_LEVEL[lvl - 1] || 'Título Desconhecido';
+            const icon = LEVEL_ICONS_BY_LEVEL[lvl - 1] || 'fa-star';
+            const tierColor = getTierColorForLevel(lvl);
+            const targetXP = getLevelTargetXP(lvl);
+            const currentXP = Math.max(0, state.user?.xp || 0);
+            const xpInLevel = lvl <= 1 ? currentXP : Math.min(Math.max(0, currentXP), targetXP);
+            const xpForLevel = lvl <= 1 ? 0 : targetXP;
+            const progress = lvl <= 1 ? 100 : (targetXP > 0 ? Math.round((xpInLevel / targetXP) * 100) : 0);
+            
+            const isCurrent = lvl === state.user.level;
+            const statusLabel = isCurrent ? 'Seu título atual' : (lvl < state.user.level ? 'Já conquistado' : 'A conquistar');
+            const bounds = getXPBoundsForLevel(lvl, state.settings.levelXpStep);
+            const nextLevelBounds = lvl < 100 ? getXPBoundsForLevel(lvl + 1, state.settings.levelXpStep) : bounds;
+            
+            const progressPercentage = lvl <= 1 ? 100 : Math.min(100, Math.max(0, Math.round((currentXP - bounds.currBase) / (bounds.nextBase - bounds.currBase) * 100)));
+            
+            const tierInfo = Math.floor((lvl - 1) / 10) + 1;
+            const tierLabel = ['Iniciante', 'Aprendiz', 'Intermediário', 'Avançado', 'Experiente', 'Veterano', 'Mestre', 'Lendário', 'Épico', 'Supremo'][Math.min(tierInfo - 1, 9)];
+            
+            openModal(`
+                <div style="display: flex; flex-direction: column; gap: 20px;">
+                    <div style="text-align: center; padding-bottom: 20px; border-bottom: 1px solid rgba(199, 125, 255, 0.2);">
+                        <i class="fas ${icon}" style="font-size: 3.5rem; color: ${tierColor}; margin-bottom: 12px; display: block; text-shadow: 0 0 20px ${tierColor}80;"></i>
+                        <h2 style="margin: 10px 0;">${name}</h2>
+                        <p style="color: var(--text-muted); margin: 0;">Nível ${lvl} • Tier ${tierInfo} (${tierLabel})</p>
+                        <p style="color: ${tierColor}; font-weight: 700; margin-top: 8px;">${statusLabel}</p>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div style="background: rgba(255,255,255,0.03); padding: 14px; border-radius: 12px; border: 1px solid rgba(199,125,255,0.15);">
+                            <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0 0 6px 0;">XP Atual</p>
+                            <p style="font-size: 1.5rem; font-weight: 700; color: var(--neon-purple); margin: 0;">${currentXP.toLocaleString('pt-BR')}</p>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.03); padding: 14px; border-radius: 12px; border: 1px solid rgba(199,125,255,0.15);">
+                            <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0 0 6px 0;">Meta do Título</p>
+                            <p style="font-size: 1.5rem; font-weight: 700; color: var(--neon-blue); margin: 0;">${lvl <= 1 ? '0' : targetXP.toLocaleString('pt-BR')}</p>
+                        </div>
+                    </div>
+                    
+                    <div style="background: rgba(255,255,255,0.02); padding: 16px; border-radius: 12px; border: 1px solid rgba(199,125,255,0.15);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <span style="color: var(--text-muted); font-size: 0.9rem;">Progresso para este título</span>
+                            <span style="font-weight: 700; color: ${tierColor};">${progressPercentage}%</span>
+                        </div>
+                        <div style="height: 20px; background: rgba(15, 30, 61, 0.9); border-radius: 999px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08);">
+                            <div style="height: 100%; width: ${progressPercentage}%; background: linear-gradient(90deg, ${tierColor}cc, ${tierColor}, ${tierColor}bb); box-shadow: 0 0 18px ${tierColor}80; transition: width 0.6s ease;"></div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div style="background: rgba(255,255,255,0.02); padding: 12px; border-radius: 10px;">
+                            <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0 0 4px 0;">Nível anterior</p>
+                            <p style="color: var(--text-main); font-weight: 700; margin: 0;">${Math.max(1, lvl - 1)}</p>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.02); padding: 12px; border-radius: 10px;">
+                            <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0 0 4px 0;">Próximo nível</p>
+                            <p style="color: var(--text-main); font-weight: 700; margin: 0;">${Math.min(100, lvl + 1)}</p>
+                        </div>
+                    </div>
+                    
+                    <div style="background: rgba(255,255,255,0.02); padding: 14px; border-radius: 10px; border-left: 3px solid ${tierColor};">
+                        <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">
+                            ${lvl <= 1 
+                                ? '🌱 Título inicial já desbloqueado. Comece a ganhar XP para evoluir!' 
+                                : lvl === state.user.level 
+                                    ? `🔥 Você está neste nível agora. Ganhe ${Math.max(0, targetXP - currentXP).toLocaleString('pt-BR')} XP para chegar ao próximo!`
+                                    : lvl < state.user.level 
+                                        ? `✓ Você já conquistou este título! Continue avançando!`
+                                        : `⭐ Ganhe ${Math.max(0, targetXP - currentXP).toLocaleString('pt-BR')} XP para desbloquear este título!`
+                            }
+                        </p>
+                    </div>
+                    
+                    <div class="actions">
+                        <button class="btn-primary btn-cancel">Fechar</button>
+                    </div>
+                </div>
+            `);
+        }
+
+        function openLevelCodexModal(allCards, curLevel, total, initialPage = 1) {
+            const ITEMS_PER_PAGE = 20;
+            const totalPages = Math.ceil(total / ITEMS_PER_PAGE);
+            const currentPage = Math.min(Math.max(1, initialPage), totalPages);
+
+            function renderPage(page) {
+                const start = (page - 1) * ITEMS_PER_PAGE;
+                const end = Math.min(start + ITEMS_PER_PAGE, total);
+                
+                // Dividir os cards em strings individuais (aproximadamente)
+                const cardLines = [];
+                let currentCard = '';
+                for (let i = 0; i < allCards.length; i++) {
+                    // Simples divisão baseada em indice
+                    if (i >= start && i < end) {
+                        const lvl = i + 1;
+                        const name = LEVEL_TITLES_BY_LEVEL[i];
+                        const icon = LEVEL_ICONS_BY_LEVEL[i] || 'fa-star';
+                        const isCurrent = lvl === curLevel;
+                        const tierColor = getTierColorForLevel(lvl);
+                        const targetXP = getLevelTargetXP(lvl);
+                        const progress = getLevelProgressForLevel(lvl);
+                        const statusLabel = isCurrent ? 'Seu título atual' : (lvl < curLevel ? 'Já conquistado' : 'A conquistar');
+                        cardLines.push(`
+                            <div class="level-card" style="border-color: ${tierColor}33; box-shadow: 0 18px 42px ${tierColor}22, inset 0 0 22px ${tierColor}14;">
+                                <div class="lvl-info">
+                                    <div class="lvl-name">${name}</div>
+                                    <div class="lvl-badge">Lvl ${lvl}</div>
+                                    <div class="lvl-icon"><i class="fas ${icon}"></i></div>
+                                    <div class="lvl-hint">${statusLabel}</div>
+                                </div>
+                                <div class="lvl-details">
+                                    <div class="lvl-details-row"><strong>XP atual</strong><span>${Math.max(0, state.user?.xp || 0)} XP</span></div>
+                                    <div class="lvl-details-row"><strong>Meta do título</strong><span>${lvl <= 1 ? '0 XP' : `${targetXP} XP`}</span></div>
+                                    <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: ${progress}%; background: linear-gradient(90deg, ${tierColor}cc, ${tierColor}, ${tierColor}bb);"></div></div>
+                                    <div class="lvl-detail-note">${lvl <= 1 ? 'Título inicial já desbloqueado.' : `Progresso atual para este título: ${progress}%`}</div>
+                                </div>
+                            </div>
+                        `);
+                    }
+                }
+                
+                const paginationHtml = totalPages > 1 ? `
+                    <div style="display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 20px; padding-top: 16px; border-top: 1px solid rgba(199, 125, 255, 0.15);">
+                        <button id="btn-codex-prev" class="btn-primary" ${page <= 1 ? 'disabled' : ''} style="padding: 10px 14px;">
+                            <i class="fas fa-chevron-left"></i> Anterior
+                        </button>
+                        <span style="color: var(--text-muted); font-weight: 700;">Página ${page} de ${totalPages}</span>
+                        <button id="btn-codex-next" class="btn-primary" ${page >= totalPages ? 'disabled' : ''} style="padding: 10px 14px;">
+                            Próxima <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                ` : '';
+
+                openModal(`
+                    <div class="level-codex">
+                        <div class="level-codex-header">
+                            <div>
+                                <h2>Códice de Títulos</h2>
+                                <div class="level-codex-sub">100 títulos (1 por nível) — estilo RPG / progressão</div>
+                            </div>
+                            <div class="actions" style="margin-top: 0;">
+                                <button id="btn-toggle-level-theme" class="tier-toggle-btn ${state.settings.levelThemeEnabled ? '' : 'is-off'}">
+                                    <i class="fas ${state.settings.levelThemeEnabled ? 'fa-wand-magic-sparkles' : 'fa-moon'}"></i>
+                                    ${state.settings.levelThemeEnabled ? 'Cores de Nível: Ligado' : 'Cores de Nível: Desligado'}
+                                </button>
+                                <button class="btn-primary btn-cancel">Fechar</button>
+                            </div>
+                        </div>
+                        <div class="level-codex-grid">
+                            ${cardLines.join('')}
+                        </div>
+                        ${paginationHtml}
+                    </div>
+                `);
+
+                const btnToggle = document.getElementById('btn-toggle-level-theme');
+                if (btnToggle) {
+                    btnToggle.onclick = () => {
+                        state.settings.levelThemeEnabled = !state.settings.levelThemeEnabled;
+                        saveState();
+                        applyTierTheme(state.user.level);
+                        btnToggle.classList.toggle('is-off', !state.settings.levelThemeEnabled);
+                        btnToggle.innerHTML = `
+                            <i class="fas ${state.settings.levelThemeEnabled ? 'fa-wand-magic-sparkles' : 'fa-moon'}"></i>
+                            ${state.settings.levelThemeEnabled ? 'Cores de Nível: Ligado' : 'Cores de Nível: Desligado'}
+                        `;
+                        showToast(state.settings.levelThemeEnabled ? 'Cores por nível ativadas.' : 'Cores por nível desativadas.', 'info');
+                    };
+                }
+
+                const btnPrev = document.getElementById('btn-codex-prev');
+                const btnNext = document.getElementById('btn-codex-next');
+                
+                if (btnPrev && page > 1) {
+                    btnPrev.onclick = () => renderPage(page - 1);
+                }
+                if (btnNext && page < totalPages) {
+                    btnNext.onclick = () => renderPage(page + 1);
+                }
+
+                document.querySelectorAll('.level-card').forEach(card => {
+                    card.addEventListener('click', (e) => {
+                        // Extrair o nível do badge
+                        const badgeText = card.querySelector('.lvl-badge')?.textContent || '';
+                        const levelMatch = badgeText.match(/\d+/);
+                        const level = levelMatch ? parseInt(levelMatch[0]) : 1;
+                        
+                        // Abrir modal detalhado
+                        openLevelDetailModal(level);
+                    });
+                });
+            }
+
+            renderPage(currentPage);
+        }
+
         function openLevelCodex() {
+
             // Fechar menu hamburger no mobile ao abrir o Códice
             if (window.innerWidth <= 1024) {
-                document.body.classList.remove('nav-drawer-open');
+                closeMobileNav();
             }
             ensureSettings();
             const curLevel = Math.max(1, Number(state.user?.level) || 1);
             const total = Math.min(100, LEVEL_TITLES_BY_LEVEL.length, LEVEL_ICONS_BY_LEVEL.length);
+            
+            // Calcular página inicial baseada no nível atual
+            const ITEMS_PER_PAGE = 20;
+            const initialPage = Math.ceil(curLevel / ITEMS_PER_PAGE);
 
             const cards = Array.from({ length: total }, (_, i) => {
                 const lvl = i + 1;
@@ -2710,55 +2935,7 @@
                     `;
                 }).join('');
 
-            openModal(`
-                <div class="level-codex">
-                    <div class="level-codex-header">
-                        <div>
-                            <h2>Códice de Títulos</h2>
-                            <div class="level-codex-sub">100 títulos (1 por nível) — estilo RPG / progressão</div>
-                        </div>
-                        <div class="actions" style="margin-top: 0;">
-                            <button id="btn-toggle-level-theme" class="tier-toggle-btn ${state.settings.levelThemeEnabled ? '' : 'is-off'}">
-                                <i class="fas ${state.settings.levelThemeEnabled ? 'fa-wand-magic-sparkles' : 'fa-moon'}"></i>
-                                ${state.settings.levelThemeEnabled ? 'Cores de Nível: Ligado' : 'Cores de Nível: Desligado'}
-                            </button>
-                            <button class="btn-primary btn-cancel">Fechar</button>
-                        </div>
-                    </div>
-                    <div class="level-codex-grid">
-                        ${cards}
-                    </div>
-                </div>
-            `);
-
-            const btnToggle = document.getElementById('btn-toggle-level-theme');
-            if (btnToggle) {
-                btnToggle.onclick = () => {
-                    state.settings.levelThemeEnabled = !state.settings.levelThemeEnabled;
-                    saveState();
-                    applyTierTheme(state.user.level);
-                    btnToggle.classList.toggle('is-off', !state.settings.levelThemeEnabled);
-                    btnToggle.innerHTML = `
-                        <i class="fas ${state.settings.levelThemeEnabled ? 'fa-wand-magic-sparkles' : 'fa-moon'}"></i>
-                        ${state.settings.levelThemeEnabled ? 'Cores de Nível: Ligado' : 'Cores de Nível: Desligado'}
-                    `;
-                    showToast(state.settings.levelThemeEnabled ? 'Cores por nível ativadas.' : 'Cores por nível desativadas.', 'info');
-                };
-            }
-
-            document.querySelectorAll('.level-card').forEach(card => {
-                card.addEventListener('click', () => {
-                    const isExpanded = card.classList.toggle('expanded');
-                    const details = card.querySelector('.lvl-details');
-                    if (details) {
-                        if (isExpanded) {
-                            details.style.maxHeight = details.scrollHeight + 'px';
-                        } else {
-                            details.style.maxHeight = '0px';
-                        }
-                    }
-                });
-            });
+            openLevelCodexModal(cards, curLevel, total, initialPage);
         }
 
         function updateAchievementsToggleButton() {

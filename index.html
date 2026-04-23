@@ -3158,18 +3158,32 @@
         function deleteTask(id) {
             const data = getDayData(currentDateStr);
             const task = data.tasks.find(t => t.id === id);
-            if (task && task.completed) {
-                const taskXp = task.lastXpAward || ensureSettings().taskXp;
-                if (!task.xpDebitedByHidden) {
-                    debitXP(taskXp);
+            if (!task) return;
+            
+            openModal(`
+                <h2>Confirmar Exclusão</h2>
+                <p style="color: var(--text-muted); margin-bottom: 20px;">Tem certeza que deseja excluir a tarefa "<strong>${task.title}</strong>"?</p>
+                ${task.completed ? '<p style="color: var(--neon-pink); margin-bottom: 20px;"><i class="fas fa-exclamation-triangle"></i> Esta tarefa está concluída e você perderá o XP ganho!</p>' : ''}
+                <div class="actions">
+                    <button class="btn-cancel">Cancelar</button>
+                    <button class="btn-danger btn-confirm">Excluir Tarefa</button>
+                </div>
+            `, () => {
+                // Executar a exclusão após confirmação
+                if (task && task.completed) {
+                    const taskXp = task.lastXpAward || ensureSettings().taskXp;
+                    if (!task.xpDebitedByHidden) {
+                        debitXP(taskXp);
+                    }
                 }
-            }
-            data.tasks = data.tasks.filter(t => t.id !== id);
-            if (currentDateStr === getLocalYMD(new Date())) {
-                evaluateDailyAchievementsForDate(currentDateStr);
-            }
-            saveState();
-            renderDados();
+                data.tasks = data.tasks.filter(t => t.id !== id);
+                if (currentDateStr === getLocalYMD(new Date())) {
+                    evaluateDailyAchievementsForDate(currentDateStr);
+                }
+                saveState();
+                renderDados();
+                showToast('Tarefa excluída com sucesso.', 'success');
+            });
         }
 
         function editDayTask(id) {

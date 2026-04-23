@@ -115,6 +115,24 @@
             margin-bottom: 20px;
             font-size: 0.9rem;
         }
+        .level-title {
+            font-family: 'Cinzel', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-weight: 800;
+            font-size: 0.86rem;
+            letter-spacing: 0.06em;
+            color: #efe6ff;
+            text-shadow: 0 0 14px rgba(199, 125, 255, 0.45), 0 0 10px rgba(76, 201, 240, 0.25);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .level-title i {
+            color: var(--neon-purple);
+            font-size: 0.86rem;
+            filter: drop-shadow(0 0 8px rgba(199, 125, 255, 0.45));
+        }
         
         .progress-bar-bg {
             background: rgba(15, 30, 61, 0.9);
@@ -398,7 +416,18 @@
         .section-block .task-list::-webkit-scrollbar-thumb { background: rgba(90,240,255,0.2); border-radius: 4px; }
 
         .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid rgba(124, 58, 237, 0.2); padding-bottom: 10px;}
-        .section-title { display: flex; align-items: center; gap: 10px; font-weight: bold; }
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+            min-width: 0;
+            flex: 1 1 auto;
+            white-space: normal;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+            line-height: 1.35;
+        }
         
         .task-list { list-style: none; }
         .task-item {
@@ -424,6 +453,30 @@
 
         .add-task-form { display: flex; gap: 10px; margin-top: 10px; }
         .add-task-form input { flex: 1; }
+        .template-item { display: block; }
+        .template-item .template-info {
+            display: block;
+            margin: 0;
+            cursor: default;
+        }
+        .template-item .template-title {
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 6px;
+        }
+        .template-item .template-days {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+        .template-item .template-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
 
         /* Dashboard Heatmap — largura total da área de conteúdo */
         .chart-heatmap-compact {
@@ -679,6 +732,11 @@
             .section-header, .add-task-form, .form-add-template { flex-direction: column; align-items: stretch; }
             .task-actions { gap: 6px; }
             .icon-picker { grid-template-columns: repeat(6, minmax(40px, 1fr)); }
+            #tab-secoes .template-item .template-actions { justify-content: flex-start; width: 100%; }
+            #tab-dashboard .heatmap-container { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+            #tab-secoes .section-header { gap: 10px; align-items: flex-start; }
+            #tab-secoes .section-title { width: 100%; font-size: 0.95rem; }
+            #tab-secoes .section-title .cat-label { align-self: flex-start; }
         }
     </style>
 </head>
@@ -699,6 +757,10 @@
         </button>
         <div class="brand"><i class="fas fa-dragon brand-icon" aria-hidden="true"></i>Nocturnal<span class="brand-sub">Flow</span></div>
         <div class="user-stats-nav">
+            <div id="nav-level-title" class="level-title">
+                <i id="nav-level-title-icon" class="fas fa-seedling" aria-hidden="true"></i>
+                <span id="nav-level-title-text">Novato Arcano</span>
+            </div>
             <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
                 <span id="nav-level-text">Lvl 1</span>
                 <span id="nav-xp-text" class="text-neon-purple">0 XP</span>
@@ -846,6 +908,22 @@
                 </div>
 
                 <div class="card">
+                    <h3>Progressão</h3>
+                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">Defina a dificuldade da subida de nível. Menor valor = evolução mais rápida.</p>
+                    <label for="level-xp-step" style="font-size: 0.85rem; color: var(--text-muted); display:block; margin-bottom:6px;">XP por nível (base)</label>
+                    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                        <input type="range" id="level-xp-step" min="10" max="100" step="10" value="50" style="flex:1; min-width: 220px;">
+                        <span id="level-xp-step-value" class="text-neon-purple" style="font-weight:700; min-width: 70px; text-align:right;">50 XP</span>
+                    </div>
+                    <label for="task-xp-step" style="font-size: 0.85rem; color: var(--text-muted); display:block; margin:12px 0 6px;">XP por atividade</label>
+                    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                        <input type="range" id="task-xp-step" min="10" max="100" step="10" value="10" style="flex:1; min-width: 220px;">
+                        <span id="task-xp-step-value" class="text-neon-blue" style="font-weight:700; min-width: 70px; text-align:right;">10 XP</span>
+                    </div>
+                    <p style="font-size: 0.78rem; color: var(--text-muted); margin-top: 10px;">A barra de XP e os níveis são recalculados automaticamente.</p>
+                </div>
+
+                <div class="card">
                     <h3>Gerenciar Categorias</h3>
                     <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">Excluir uma categoria remove seções, templates e todas as tarefas do histórico vinculadas a ela.</p>
                     <form id="form-new-category" style="display: flex; flex-direction: column; gap: 12px;">
@@ -911,6 +989,37 @@
         ];
 
         const WEEKDAY_NAMES = ['Dom','Seg','Ter','Qua','Qui','Sex','Sab'];
+
+        const DEFAULT_SETTINGS = {
+            levelXpStep: 50,
+            taskXp: 10
+        };
+
+        const LEVEL_TITLES_BY_BRACKET = [
+            'Novato Arcano','Aprendiz Lunar','Discípulo da Névoa','Escudeiro da Aurora','Guardião do Crepúsculo',
+            'Sentinela Astral','Adepto Umbral','Vidente Noturno','Forjador de Hábitos','Condutor de Runas',
+            'Arquiteto do Foco','Cavaleiro Etéreo','Mestre da Bruma','Oráculo da Disciplina','Lorde do Compasso',
+            'Comandante Celeste','Estratégista Estelar','Vigilante Prismático','Domador de Tempestades','Paladino da Persistência',
+            'Sábio do Eclipse','Mago da Constância','Engenheiro do Ritmo','General da Rotina','Titã da Vontade',
+            'Luminário Arcano','Guardião Supremo','Mestre da Penumbra','Imperador da Ordem','Arconte da Fênix',
+            'Lenda da Madrugada','Arquimago da Ação','Vórtice da Disciplina','Almirante da Bravura','Monarca do Progresso',
+            'Soberano do Foco','Colosso Celestial','Dragão do Compromisso','Mítico da Persistência','Eterno da Rotina',
+            'Ascendente Infinito','Lorde do Firmamento','Mestre dos Mil Ecos','Sentinela do Infinito','Arconte das Estrelas',
+            'Supremo da Constância','Imperador do Cosmos','Avatar da Disciplina','Lenda Imortal','Soberano Absoluto'
+        ];
+        const LEVEL_ICONS_BY_BRACKET = [
+            'fa-seedling','fa-moon','fa-cloud-moon','fa-shield','fa-sun',
+            'fa-star','fa-mask','fa-eye','fa-hammer','fa-scroll',
+            'fa-compass','fa-chess-knight','fa-wind','fa-book-open','fa-drafting-compass',
+            'fa-rocket','fa-chess-board','fa-gem','fa-bolt','fa-shield-heart',
+            'fa-meteor','fa-hat-wizard','fa-gears','fa-chess-rook','fa-mountain',
+            'fa-lightbulb','fa-chess-king','fa-ghost','fa-crown','fa-fire',
+            'fa-dragon','fa-wand-magic-sparkles','fa-tornado','fa-anchor','fa-award',
+            'fa-bullseye','fa-globe','fa-dragon','fa-medal','fa-infinity',
+            'fa-star-of-life','fa-satellite','fa-wave-square','fa-shield-alt','fa-sun',
+            'fa-trophy','fa-crown','fa-user-astronaut','fa-chess-queen','fa-chess-king'
+        ];
+        const ARCHIVE_SECTION_ID = 'sec-archived-completed';
 
         const ACHIEVEMENTS_DEF = [
             { id: 'a1', title: 'Primeiro Passo', desc: 'Complete sua primeira tarefa.', icon: 'fa-shoe-prints' },
@@ -1338,15 +1447,60 @@
             return d.getDay();
         }
 
+        function ensureArchiveSection() {
+            let sec = state.sections.find(s => s.id === ARCHIVE_SECTION_ID);
+            if (!sec) {
+                const fallbackCat = state.categories[0]?.id || DEFAULT_CATEGORIES[0].id;
+                sec = { id: ARCHIVE_SECTION_ID, name: 'Concluídas Preservadas', categoryId: fallbackCat };
+                state.sections.push(sec);
+            } else if (!state.categories.some(c => c.id === sec.categoryId)) {
+                sec.categoryId = state.categories[0]?.id || DEFAULT_CATEGORIES[0].id;
+            }
+            return sec;
+        }
+
         function syncHistoryWithTemplates() {
             let changed = false;
             const templateIds = new Set(state.templates.map(t => t.id));
+            const hadArchiveSection = state.sections.some(s => s.id === ARCHIVE_SECTION_ID);
+            const archiveSection = ensureArchiveSection();
+            if (!hadArchiveSection) changed = true;
             Object.entries(state.history).forEach(([dateStr, day]) => {
                 const weekday = getWeekdayFromDateStr(dateStr);
 
-                // Remove tasks from templates that no longer exist
+                // Se seção foi removida, preserva concluídas em seção de arquivo.
+                day.tasks.forEach(task => {
+                    const sectionExists = state.sections.some(s => s.id === task.sectionId);
+                    if (!sectionExists && task.completed) {
+                        task.sectionId = archiveSection.id;
+                        if (!state.categories.some(c => c.id === task.categoryId)) {
+                            task.categoryId = archiveSection.categoryId;
+                        }
+                        task.templateId = null;
+                        changed = true;
+                    } else if (!sectionExists && !task.completed) {
+                        task.__dropMissingSection = true;
+                        changed = true;
+                    }
+                });
+                day.tasks = day.tasks.filter(t => !t.__dropMissingSection);
+                day.tasks.forEach(t => { delete t.__dropMissingSection; });
+
+                // Remove tarefas de template removido apenas se não concluídas.
                 const beforeCleanup = day.tasks.length;
-                day.tasks = day.tasks.filter(t => !t.templateId || templateIds.has(t.templateId));
+                day.tasks = day.tasks.filter(t => {
+                    if (!t.templateId) return true;
+                    if (templateIds.has(t.templateId)) return true;
+                    if (t.completed) {
+                        t.templateId = null;
+                        if (!state.sections.some(s => s.id === t.sectionId)) t.sectionId = archiveSection.id;
+                        if (!state.categories.some(c => c.id === t.categoryId)) t.categoryId = archiveSection.categoryId;
+                        changed = true;
+                        return true;
+                    }
+                    changed = true;
+                    return false;
+                });
                 if (day.tasks.length !== beforeCleanup) changed = true;
 
                 state.templates.forEach(template => {
@@ -1377,7 +1531,13 @@
                             changed = true;
                         }
                     } else if (existingTask) {
-                        day.tasks = day.tasks.filter(t => t.templateId !== template.id);
+                        if (existingTask.completed) {
+                            existingTask.templateId = null;
+                            if (!state.sections.some(s => s.id === existingTask.sectionId)) existingTask.sectionId = archiveSection.id;
+                            if (!state.categories.some(c => c.id === existingTask.categoryId)) existingTask.categoryId = archiveSection.categoryId;
+                        } else {
+                            day.tasks = day.tasks.filter(t => t.templateId !== template.id);
+                        }
                         changed = true;
                     }
                 });
@@ -1397,7 +1557,8 @@
                 { id: 't3', sectionId: 'sec2', title: 'Revisar E-mails', days: [1,2,3,4,5] }
             ],
             history: {}, // 'YYYY-MM-DD': { xp: 0, tasks: [ {id, title, secId, catId, completed, hidden} ] }
-            user: { xp: 0, level: 1, streak: 0, lastActiveDate: null, achievements: [] }
+            user: { xp: 0, level: 1, streak: 0, lastActiveDate: null, achievements: [] },
+            settings: { ...DEFAULT_SETTINGS }
         };
 
         let currentDateStr = getLocalYMD(new Date());
@@ -1408,8 +1569,10 @@
         function init() {
             loadState();
             ensureUserStats();
+            ensureSettings();
             setupEventListeners();
             checkStreak();
+            recalculateUserLevel();
             updateSidebar();
             navigate('dados');
             document.getElementById('current-date-input').value = currentDateStr;
@@ -1421,6 +1584,44 @@
             const d = new Date(date);
             d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
             return d.toISOString().split('T')[0];
+        }
+        function ensureSettings() {
+            if (!state.settings) state.settings = { ...DEFAULT_SETTINGS };
+            if (typeof state.settings.levelXpStep !== 'number' || Number.isNaN(state.settings.levelXpStep)) {
+                state.settings.levelXpStep = DEFAULT_SETTINGS.levelXpStep;
+            }
+            if (typeof state.settings.taskXp !== 'number' || Number.isNaN(state.settings.taskXp)) {
+                state.settings.taskXp = DEFAULT_SETTINGS.taskXp;
+            }
+            state.settings.levelXpStep = Math.max(10, Math.min(100, state.settings.levelXpStep));
+            return state.settings;
+        }
+        function getLevelFromXP(xp, step = ensureSettings().levelXpStep) {
+            const safeXP = Math.max(0, xp);
+            const safeStep = Math.max(1, step);
+            const lvl = Math.floor((1 + Math.sqrt(1 + (8 * safeXP) / safeStep)) / 2);
+            return Math.max(1, lvl);
+        }
+        function getXPBoundsForLevel(level, step = ensureSettings().levelXpStep) {
+            const lvl = Math.max(1, level);
+            const currBase = Math.round(step * ((lvl - 1) * lvl) / 2);
+            const nextBase = Math.round(step * (lvl * (lvl + 1)) / 2);
+            return { currBase, nextBase };
+        }
+        function getLevelTitle(level) {
+            const idx = Math.min(LEVEL_TITLES_BY_BRACKET.length - 1, Math.max(0, Math.floor((Math.max(1, level) - 1) / 2)));
+            return LEVEL_TITLES_BY_BRACKET[idx];
+        }
+        function getLevelIcon(level) {
+            const idx = Math.min(LEVEL_ICONS_BY_BRACKET.length - 1, Math.max(0, Math.floor((Math.max(1, level) - 1) / 2)));
+            return LEVEL_ICONS_BY_BRACKET[idx] || 'fa-star';
+        }
+        function recalculateUserLevel() {
+            ensureSettings();
+            const prevLevel = state.user.level || 1;
+            const nextLevel = getLevelFromXP(state.user.xp, state.settings.levelXpStep);
+            state.user.level = nextLevel;
+            return { prevLevel, nextLevel };
         }
         function getCategory(id) { return state.categories.find(c => c.id === id) || state.categories[0]; }
         function getSection(id) { return state.sections.find(s => s.id === id); }
@@ -1505,6 +1706,7 @@
                 // Garante que estruturas novas existam se importar de versão velha
                 if(!state.user.achievements) state.user.achievements = [];
                 ensureUserStats();
+                ensureSettings();
                 syncHistoryWithTemplates();
             }
         }
@@ -1514,16 +1716,47 @@
             state.user.xp += amount;
             if(!state.history[currentDateStr]) initDay(currentDateStr);
             state.history[currentDateStr].xp += amount;
-            
-            // Calc Level: Lvl 1 = 0, Lvl 2 = 100, Lvl 3 = 250, formula = Math.floor(sqrt(xp/20)) + 1 aprox.
-            // Para simplificar: Cada nível precisa de (Nivel * 100) XP do anterior.
-            // Formula simples: level = floor(sqrt(xp / 100)) + 1
-            const newLevel = Math.floor(Math.sqrt(state.user.xp / 50)) + 1;
-            if (newLevel > state.user.level) {
-                state.user.level = newLevel;
-                showToast(`<i class="fas fa-level-up-alt"></i> Level Up! Nível ${newLevel}`, 'success');
-                if(newLevel >= 5) unlockAchievement('a5');
+
+            const { prevLevel, nextLevel } = recalculateUserLevel();
+            if (nextLevel > prevLevel) {
+                showToast(`<i class="fas fa-level-up-alt"></i> Level Up! Nível ${nextLevel}`, 'success');
+                if(nextLevel >= 5) unlockAchievement('a5');
             }
+            updateSidebar();
+            saveState();
+        }
+
+        function debitXP(amount) {
+            const debit = Math.max(0, amount || 0);
+            if (debit <= 0) return;
+            if(!state.history[currentDateStr]) initDay(currentDateStr);
+            state.history[currentDateStr].xp = Math.max(0, state.history[currentDateStr].xp - debit);
+            state.user.xp = Math.max(0, state.user.xp - debit);
+            recalculateUserLevel();
+            updateSidebar();
+            saveState();
+        }
+
+        function recalculateXpFromHistory(newTaskXp) {
+            const taskXp = Math.max(10, Math.min(100, Number(newTaskXp) || ensureSettings().taskXp));
+            let totalXP = 0;
+
+            Object.values(state.history).forEach(day => {
+                let dayXP = 0;
+                day.tasks.forEach(task => {
+                    if (task.completed) {
+                        task.lastXpAward = taskXp;
+                        if (!task.xpDebitedByHidden) dayXP += taskXp;
+                    } else {
+                        task.lastXpAward = 0;
+                    }
+                });
+                day.xp = dayXP;
+                totalXP += dayXP;
+            });
+
+            state.user.xp = totalXP;
+            recalculateUserLevel();
             updateSidebar();
             saveState();
         }
@@ -1568,14 +1801,16 @@
         }
 
         function updateSidebar() {
+            ensureSettings();
             document.getElementById('nav-level-text').innerText = `Lvl ${state.user.level}`;
+            document.getElementById('nav-level-title-text').innerText = getLevelTitle(state.user.level);
+            document.getElementById('nav-level-title-icon').className = `fas ${getLevelIcon(state.user.level)}`;
             document.getElementById('nav-xp-text').innerText = `${state.user.xp} XP`;
             document.getElementById('nav-streak').innerText = state.user.streak;
-            
-            const nextLevelXP = Math.pow(state.user.level, 2) * 50;
-            const currentLevelBaseXP = Math.pow(state.user.level - 1, 2) * 50;
-            const progress = ((state.user.xp - currentLevelBaseXP) / (nextLevelXP - currentLevelBaseXP)) * 100;
-            
+
+            const bounds = getXPBoundsForLevel(state.user.level, state.settings.levelXpStep);
+            const progress = ((state.user.xp - bounds.currBase) / (bounds.nextBase - bounds.currBase)) * 100;
+
             document.getElementById('nav-xp-bar').style.width = `${Math.min(progress, 100)}%`;
         }
 
@@ -1709,11 +1944,17 @@
                         <button class="btn-danger btn-confirm">Resetar Dia</button>
                     </div>
                 `, () => {
+                    const dayData = state.history[currentDateStr];
+                    if (dayData) {
+                        state.user.xp = Math.max(0, state.user.xp - (dayData.xp || 0));
+                        recalculateUserLevel();
+                        updateSidebar();
+                    }
                     delete state.history[currentDateStr];
                     ensureUserStats().dayResets++;
                     saveState();
                     renderDados();
-                    showToast('Dia resetado.');
+                    showToast('Dia resetado e XP do dia removido.');
                 });
             });
 
@@ -1827,15 +2068,18 @@
             const data = getDayData(currentDateStr);
             const task = data.tasks.find(t => t.id === id);
             if(task) {
+                if (task.completed === isCompleted) return;
+                const taskXp = ensureSettings().taskXp;
                 task.completed = isCompleted;
                 if(isCompleted) {
-                    addXP(10);
+                    task.lastXpAward = taskXp;
+                    addXP(taskXp);
                     unlockAchievement('a1');
                     recordActivity();
                 } else {
-                    // Remove XP local (não tira nivel para nao complicar)
-                    data.xp = Math.max(0, data.xp - 10);
-                    state.user.xp = Math.max(0, state.user.xp - 10);
+                    const rollbackXp = task.lastXpAward || taskXp;
+                    debitXP(rollbackXp);
+                    task.lastXpAward = 0;
                 }
                 saveState();
                 renderDados();
@@ -1856,11 +2100,33 @@
         function toggleTaskVisibility(id) {
             const data = getDayData(currentDateStr);
             const task = data.tasks.find(t => t.id === id);
-            if(task) { task.hidden = !task.hidden; saveState(); renderDados(); }
+            if(task) {
+                const willHide = !task.hidden;
+                const taskXp = task.lastXpAward || ensureSettings().taskXp;
+                task.hidden = willHide;
+                if (task.completed) {
+                    if (willHide && !task.xpDebitedByHidden) {
+                        debitXP(taskXp);
+                        task.xpDebitedByHidden = true;
+                    } else if (!willHide && task.xpDebitedByHidden) {
+                        addXP(taskXp);
+                        task.xpDebitedByHidden = false;
+                    }
+                }
+                saveState();
+                renderDados();
+            }
         }
 
         function deleteTask(id) {
             const data = getDayData(currentDateStr);
+            const task = data.tasks.find(t => t.id === id);
+            if (task && task.completed) {
+                const taskXp = task.lastXpAward || ensureSettings().taskXp;
+                if (!task.xpDebitedByHidden) {
+                    debitXP(taskXp);
+                }
+            }
             data.tasks = data.tasks.filter(t => t.id !== id);
             saveState();
             renderDados();
@@ -2282,7 +2548,9 @@
             const container = document.getElementById('templates-container');
             container.innerHTML = '';
 
-            state.sections.forEach(sec => {
+            state.sections
+                .filter(sec => sec.id !== ARCHIVE_SECTION_ID)
+                .forEach(sec => {
                 const cat = getCategory(sec.categoryId);
                 const temps = state.templates.filter(t => t.sectionId === sec.id);
                 
@@ -2295,22 +2563,26 @@
                                 </span>
                                 ${sec.name}
                             </div>
-                            <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                                <button class="btn-primary" style="padding: 5px 10px;" onclick="editSection('${sec.id}')"><i class="fas fa-edit"></i></button>
-                            <button class="btn-danger" style="padding: 5px 10px;" onclick="deleteSection('${sec.id}')"><i class="fas fa-trash"></i></button>
-                            </div>
+                            ${sec.id === ARCHIVE_SECTION_ID ? `
+                                <span style="font-size:0.75rem; color: var(--text-muted);">Seção automática para concluídas preservadas</span>
+                            ` : `
+                                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                                    <button class="btn-primary" style="padding: 5px 10px;" onclick="editSection('${sec.id}')"><i class="fas fa-edit"></i></button>
+                                    <button class="btn-danger" style="padding: 5px 10px;" onclick="deleteSection('${sec.id}')"><i class="fas fa-trash"></i></button>
+                                </div>
+                            `}
                         </div>
                         
                         <div style="margin-bottom: 15px; display:grid; gap: 12px;">
                             ${temps.map(t => `
-                                <div class="task-item" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);">
-                                    <div class="task-info">
-                                        <div style="font-weight:700; color: var(--text-main);">${t.title}</div>
-                                        <div style="font-size:0.75rem; color: var(--text-muted); margin-top: 4px;">
+                                <div class="task-item template-item" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);">
+                                    <div class="template-info">
+                                        <div class="template-title">${t.title}</div>
+                                        <div class="template-days">
                                             Dias: ${['Dom','Seg','Ter','Qua','Qui','Sex','Sab'].map((d,i) => t.days.includes(i) ? `<span style="color:var(--neon-blue); font-weight:700;">${d}</span>` : `<span>${d}</span>`).join(' ')}
                                         </div>
                                     </div>
-                                    <div style="display:flex; gap: 8px; align-items:center; justify-content:flex-end; margin-top: 10px; flex-wrap: wrap;">
+                                    <div class="template-actions">
                                         <button class="btn-primary" style="padding: 8px 12px;" onclick="editTemplate('${t.id}')"><i class="fas fa-edit"></i> Editar</button>
                                         <button class="btn-danger" style="padding: 8px 12px;" onclick="deleteTemplate('${t.id}')"><i class="fas fa-trash"></i></button>
                                     </div>
@@ -2318,6 +2590,7 @@
                             `).join('')}
                         </div>
 
+                        ${sec.id === ARCHIVE_SECTION_ID ? '' : `
                         <form class="form-add-template" data-secid="${sec.id}" style="display:flex; gap:10px; align-items:center; flex-wrap: wrap; background: var(--bg-base); padding: 10px; border-radius: 4px;">
                             <input type="text" placeholder="Nova tarefa template..." required style="flex: 1; min-width: 200px;">
                             <div style="display:flex; gap:5px;" class="day-selectors">
@@ -2329,6 +2602,7 @@
                             </div>
                             <button type="submit" class="btn-primary" style="padding: 5px 10px;"><i class="fas fa-save"></i></button>
                         </form>
+                        `}
                     </div>
                 `;
                 container.innerHTML += secHtml;
@@ -2362,7 +2636,11 @@
         }
 
         window.deleteSection = (id) => {
-            openModal(`<h2>Excluir Seção?</h2><p>Isso removerá a seção e seus templates (não afetará o histórico passado).</p>
+            if (id === ARCHIVE_SECTION_ID) {
+                showToast('A seção de preservadas não pode ser excluída.', 'error');
+                return;
+            }
+            openModal(`<h2>Excluir Seção?</h2><p>Isso removerá a seção e seus templates. Tarefas concluídas relacionadas serão preservadas em “Concluídas Preservadas”.</p>
             <div class="actions"><button class="btn-cancel">Cancelar</button><button class="btn-danger btn-confirm">Excluir</button></div>`, 
             () => {
                 state.sections = state.sections.filter(s => s.id !== id);
@@ -2508,6 +2786,7 @@
         // 5. CONFIGURAÇÕES
         function renderConfig() {
             ensureUserStats();
+            ensureSettings();
             const list = document.getElementById('categories-list');
             list.innerHTML = state.categories.map(c => `
                 <div class="category-row">
@@ -2552,6 +2831,39 @@
             const btnCancelEdit = document.getElementById('btn-cancel-edit-category');
             btnCancelEdit.onclick = () => resetCategoryForm();
 
+            const levelStepInput = document.getElementById('level-xp-step');
+            const levelStepLabel = document.getElementById('level-xp-step-value');
+            levelStepInput.value = String(state.settings.levelXpStep || DEFAULT_SETTINGS.levelXpStep);
+            levelStepLabel.textContent = `${levelStepInput.value} XP`;
+            levelStepInput.oninput = () => {
+                levelStepLabel.textContent = `${levelStepInput.value} XP`;
+            };
+            levelStepInput.onchange = () => {
+                state.settings.levelXpStep = Math.max(10, Math.min(100, parseInt(levelStepInput.value, 10) || DEFAULT_SETTINGS.levelXpStep));
+                recalculateUserLevel();
+                saveState();
+                updateSidebar();
+                checkPermanentAchievementsFromStats();
+                showToast(`Dificuldade ajustada: ${state.settings.levelXpStep} XP por nível base.`, 'success');
+                if (document.getElementById('tab-dashboard').classList.contains('active')) renderDashboard();
+            };
+
+            const taskXpInput = document.getElementById('task-xp-step');
+            const taskXpLabel = document.getElementById('task-xp-step-value');
+            taskXpInput.value = String(state.settings.taskXp || DEFAULT_SETTINGS.taskXp);
+            taskXpLabel.textContent = `${taskXpInput.value} XP`;
+            taskXpInput.oninput = () => {
+                taskXpLabel.textContent = `${taskXpInput.value} XP`;
+            };
+            taskXpInput.onchange = () => {
+                state.settings.taskXp = Math.max(10, Math.min(100, parseInt(taskXpInput.value, 10) || DEFAULT_SETTINGS.taskXp));
+                recalculateXpFromHistory(state.settings.taskXp);
+                saveState();
+                showToast(`XP por atividade ajustado para ${state.settings.taskXp}.`, 'success');
+                renderDados();
+                if (document.getElementById('tab-dashboard').classList.contains('active')) renderDashboard();
+            };
+
             // Exportar
             document.getElementById('btn-export').onclick = () => {
                 ensureUserStats().exportedOnce = true;
@@ -2575,6 +2887,8 @@
                         const importedState = JSON.parse(event.target.result);
                         if(importedState && importedState.user && importedState.categories) {
                             state = importedState;
+                            ensureSettings();
+                            recalculateUserLevel();
                             ensureUserStats().importedOnce = true;
                             saveState();
                             showToast('Dados importados com sucesso!', 'success');

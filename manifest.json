@@ -1,0 +1,23 @@
+{
+  
+  "name": "NocturnalFlow",
+  "short_name": "NocturnalFlow",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#001f3f",
+  "icons": [
+    {
+      "src": "https://i.imgur.com/U5gqRAo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://i.imgur.com/qGogLhI.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "description": "Aplicativo web de produtividade NocturnalFlow",
+  "scope": "/"
+}

@@ -1207,9 +1207,14 @@
                 border: 1px solid var(--border-subtle);
                 border-radius: 8px;
                 padding: 8px 16px;
-                color: var(--text-main);
-                font-size: 0.9rem;
-                cursor: pointer;
+            }
+            .modal-codex .desktop-only {
+                display: none;
+            }
+            @media(min-width: 701px) {
+                .modal-codex .desktop-only {
+                    display: inline-flex;
+                }
             }
             .level-codex-grid {
                 display: grid;
@@ -2761,16 +2766,34 @@
             const tierColor = getTierColorForLevel(lvl);
             const targetXP = getLevelTargetXP(lvl);
             const currentXP = Math.max(0, state.user?.xp || 0);
-            const xpInLevel = lvl <= 1 ? currentXP : Math.min(Math.max(0, currentXP), targetXP);
-            const xpForLevel = lvl <= 1 ? 0 : targetXP;
-            const progress = lvl <= 1 ? 100 : (targetXP > 0 ? Math.round((xpInLevel / targetXP) * 100) : 0);
+            const bounds = getXPBoundsForLevel(lvl, state.settings.levelXpStep);
+            
+            // Calcular progresso usando XP total e XP total necessário para o nível
+            let progressPercentage = 0;
+            let xpCurrent = currentXP;
+            let xpNeededForLevel = lvl <= 1 ? 0 : bounds.currBase;
+            
+            if (lvl <= 1) {
+                // Nível 1 já está completo (não precisa de XP)
+                progressPercentage = 100;
+                xpNeededForLevel = 0;
+            } else {
+                // Calcular progresso baseado no XP total em relação ao XP necessário para o nível
+                if (xpNeededForLevel > 0) {
+                    progressPercentage = Math.min(100, Math.max(0, (xpCurrent / xpNeededForLevel) * 100));
+                    progressPercentage = Math.round(progressPercentage);
+                }
+            }
+            
+            // Para exibição, mostrar XP total e XP total necessário
+            const xpDisplay = xpCurrent;
+            const xpNeededDisplay = xpNeededForLevel;
+            
+            // Validação final
+            progressPercentage = isNaN(progressPercentage) || !isFinite(progressPercentage) ? 0 : progressPercentage;
             
             const isCurrent = lvl === state.user.level;
             const statusLabel = isCurrent ? 'Seu título atual' : (lvl < state.user.level ? 'Já conquistado' : 'A conquistar');
-            const bounds = getXPBoundsForLevel(lvl, state.settings.levelXpStep);
-            const nextLevelBounds = lvl < 100 ? getXPBoundsForLevel(lvl + 1, state.settings.levelXpStep) : bounds;
-            
-            const progressPercentage = lvl <= 1 ? 100 : Math.min(100, Math.max(0, Math.round((currentXP - bounds.currBase) / (bounds.nextBase - bounds.currBase) * 100)));
             
             const tierInfo = Math.floor((lvl - 1) / 10) + 1;
             const tierLabel = ['Iniciante', 'Aprendiz', 'Intermediário', 'Avançado', 'Experiente', 'Veterano', 'Mestre', 'Lendário', 'Épico', 'Supremo'][Math.min(tierInfo - 1, 9)];
@@ -2786,12 +2809,12 @@
                     
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                         <div style="background: rgba(255,255,255,0.03); padding: 14px; border-radius: 12px; border: 1px solid rgba(199,125,255,0.15);">
-                            <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0 0 6px 0;">XP Atual</p>
-                            <p style="font-size: 1.5rem; font-weight: 700; color: var(--neon-purple); margin: 0;">${currentXP.toLocaleString('pt-BR')}</p>
+                            <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0 0 6px 0;">XP Total</p>
+                            <p style="font-size: 1.5rem; font-weight: 700; color: var(--neon-purple); margin: 0;">${xpDisplay.toLocaleString('pt-BR')}</p>
                         </div>
                         <div style="background: rgba(255,255,255,0.03); padding: 14px; border-radius: 12px; border: 1px solid rgba(199,125,255,0.15);">
-                            <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0 0 6px 0;">Meta do Título</p>
-                            <p style="font-size: 1.5rem; font-weight: 700; color: var(--neon-blue); margin: 0;">${lvl <= 1 ? '0' : targetXP.toLocaleString('pt-BR')}</p>
+                            <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0 0 6px 0;">XP Necessário</p>
+                            <p style="font-size: 1.5rem; font-weight: 700; color: var(--neon-blue); margin: 0;">${xpNeededDisplay.toLocaleString('pt-BR')}</p>
                         </div>
                     </div>
                     
@@ -2821,10 +2844,10 @@
                             ${lvl <= 1 
                                 ? '🌱 Título inicial já desbloqueado. Comece a ganhar XP para evoluir!' 
                                 : lvl === state.user.level 
-                                    ? `🔥 Você está neste nível agora. Ganhe ${Math.max(0, targetXP - currentXP).toLocaleString('pt-BR')} XP para chegar ao próximo!`
+                                    ? `🔥 Você está neste nível agora. Ganhe ${Math.max(0, xpNeededDisplay - xpDisplay).toLocaleString('pt-BR')} XP para chegar ao próximo!`
                                     : lvl < state.user.level 
                                         ? `✓ Você já conquistou este título! Continue avançando!`
-                                        : `⭐ Ganhe ${Math.max(0, targetXP - currentXP).toLocaleString('pt-BR')} XP para desbloquear este título!`
+                                        : `⭐ Ganhe ${Math.max(0, xpNeededDisplay - xpDisplay).toLocaleString('pt-BR')} XP para desbloquear este título!`
                             }
                         </p>
                     </div>
@@ -2917,6 +2940,7 @@
                                     <i class="fas ${state.settings.levelThemeEnabled ? 'fa-wand-magic-sparkles' : 'fa-moon'}"></i>
                                     ${state.settings.levelThemeEnabled ? 'Cores de Nível: Ligado' : 'Cores de Nível: Desligado'}
                                 </button>
+                                <button class="btn-primary btn-cancel desktop-only">Fechar</button>
                             </div>
                         </div>
                         <div class="level-codex-grid">

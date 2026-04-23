@@ -450,7 +450,7 @@
         }
         .heatmap-container {
             display: grid;
-            grid-template-columns: repeat(13, minmax(0, 1fr));
+            grid-template-columns: repeat(10, minmax(0, 1fr));
             gap: clamp(3px, 0.55vw, 8px);
             justify-items: stretch;
             align-items: stretch;
@@ -461,7 +461,7 @@
             width: 100%;
             aspect-ratio: 1;
             min-height: 0;
-            border-radius: clamp(6px, 0.9vw, 10px);
+            border-radius: clamp(6px, 0.9vw, 2px);
             background: rgba(17, 29, 58, 0.95);
             cursor: pointer;
             position: relative;
@@ -765,7 +765,7 @@
             <h2>Dashboard & Gamificação</h2>
             
             <div class="chart-wrapper chart-heatmap-compact" style="margin-top: 20px;">
-                <h3>Atividade (Últimos 91 dias)</h3>
+                <h3>Atividade (Últimos 30 dias)</h3>
                 <div class="heatmap-scroll">
                 <div class="heatmap-container" id="heatmap"></div>
                 </div>
@@ -1907,7 +1907,7 @@
             const today = new Date();
             const days = ['Dom','Seg','Ter','Qua','Qui','Sex','Sab'];
 
-            for(let i = 90; i >= 0; i--) {
+            for(let i = 29; i >= 0; i--) {
                 let d = new Date(today);
                 d.setDate(today.getDate() - i);
                 const dateStr = getLocalYMD(d);

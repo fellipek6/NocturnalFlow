@@ -1140,14 +1140,29 @@
             #tab-configuracoes #progression-controls span { text-align: left !important; min-width: 0 !important; }
 
             /* Códice de Títulos (mobile): 1 card por vez */
-            .modal.modal-codex { width: 96vw; padding: 16px; }
+            .modal.modal-codex { width: 100vw; height: 100dvh; max-width: 100vw; max-height: 100dvh; border-radius: 0; padding: 16px; padding-top: 60px; }
+            .modal-codex .modal-header-close { display: flex !important; }
+            .modal-codex .codex-close-fixed {
+                display: flex;
+                position: fixed;
+                top: 12px;
+                right: 16px;
+                z-index: 10;
+                background: var(--bg-panel);
+                border: 1px solid var(--border-subtle);
+                border-radius: 8px;
+                padding: 8px 16px;
+                color: var(--text-main);
+                font-size: 0.9rem;
+                cursor: pointer;
+            }
             .level-codex-grid {
                 display: grid;
                 grid-auto-flow: column;
                 grid-auto-columns: 100%;
                 grid-template-columns: none;
                 overflow-x: auto;
-                overflow-y: hidden;
+                overflow-y: auto;
                 scroll-snap-type: x mandatory;
                 -webkit-overflow-scrolling: touch;
                 padding-right: 0;
@@ -1156,6 +1171,9 @@
             }
             .level-card { scroll-snap-align: start; }
             .level-card .lvl-name { min-height: 0; }
+
+            /* Botões de tarefa sempre visíveis no mobile */
+            .task-actions { opacity: 1 !important; }
         }
     </style>
 </head>
@@ -1343,7 +1361,7 @@
                     </div>
                     <label for="task-xp-step" style="font-size: 0.85rem; color: var(--text-muted); display:block; margin:12px 0 6px;">XP por atividade</label>
                     <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-                        <input type="range" id="task-xp-step" min="10" max="100" step="10" value="10" style="flex:1; min-width: 220px;">
+                        <input type="range" id="task-xp-step" min="5" max="50" step="5" value="10" style="flex:1; min-width: 220px;">
                         <span id="task-xp-step-value" class="text-neon-blue" style="font-weight:700; min-width: 70px; text-align:right;">10 XP</span>
                     </div>
                     </div>
@@ -1543,30 +1561,30 @@
         ];
 
         const VOLATILE_ACHIEVEMENTS_DEF = [
-            { id: 'v1', title: 'Hoje no Azul', desc: 'Seu dia atual está com 40%+ de conclusão.', icon: 'fa-water' },
-            { id: 'v2', title: 'Ritmo de Ouro', desc: 'Seu dia atual está com 70%+ de conclusão.', icon: 'fa-crown' },
+            { id: 'v1', title: 'Hoje no Azul', desc: 'Seu dia atual está com 55%+ de conclusão.', icon: 'fa-water' },
+            { id: 'v2', title: 'Ritmo de Ouro', desc: 'Seu dia atual está com 80%+ de conclusão.', icon: 'fa-crown' },
             { id: 'v3', title: 'Dia Fechado', desc: 'Seu dia atual está 100% concluído.', icon: 'fa-circle-check' },
             { id: 'v4', title: 'Faísca Ativa', desc: 'Streak atual ≥ 3 dias.', icon: 'fa-fire' },
             { id: 'v5', title: 'Chama Firme', desc: 'Streak atual ≥ 7 dias.', icon: 'fa-fire-flame-curved' },
             { id: 'v6', title: 'Fornalha', desc: 'Streak atual ≥ 14 dias.', icon: 'fa-fire-flame-simple' },
             { id: 'v7', title: 'Momentum Semanal', desc: 'Nos últimos 7 dias, média de conclusão ≥ 60%.', icon: 'fa-chart-area' },
             { id: 'v8', title: 'Semana Limpa', desc: 'Nos últimos 7 dias, você teve ao menos 5 dias com 100%.', icon: 'fa-broom' },
-            { id: 'v9', title: 'XP Hoje', desc: (s) => `Você ganhou ${10 * (s.taskXp || 10)}+ XP hoje.`, icon: 'fa-bolt' },
-            { id: 'v10', title: 'XP Explosivo', desc: (s) => `Você ganhou ${22 * (s.taskXp || 10)}+ XP hoje.`, icon: 'fa-burst' },
-            { id: 'v11', title: 'Multitarefas', desc: 'Você concluiu 5+ tarefas hoje.', icon: 'fa-list-ul' },
-            { id: 'v12', title: 'Turbo Hoje', desc: 'Você concluiu 10+ tarefas hoje.', icon: 'fa-rocket' },
-            { id: 'v13', title: 'Categoria Líder', desc: 'Hoje, uma categoria concentra 60%+ das conclusões.', icon: 'fa-chart-pie' },
-            { id: 'v14', title: 'Equilíbrio Hoje', desc: 'Hoje você concluiu tarefas em 3+ seções.', icon: 'fa-scale-unbalanced' },
+            { id: 'v9', title: 'XP Hoje', desc: (s) => `Você ganhou ${15 * (s.taskXp || 10)}+ XP hoje.`, icon: 'fa-bolt' },
+            { id: 'v10', title: 'XP Explosivo', desc: (s) => `Você ganhou ${32 * (s.taskXp || 10)}+ XP hoje.`, icon: 'fa-burst' },
+            { id: 'v11', title: 'Multitarefas', desc: 'Você concluiu 8+ tarefas hoje.', icon: 'fa-list-ul' },
+            { id: 'v12', title: 'Turbo Hoje', desc: 'Você concluiu 15+ tarefas hoje.', icon: 'fa-rocket' },
+            { id: 'v13', title: 'Categoria Líder', desc: 'Hoje, uma categoria concentra 70%+ das conclusões.', icon: 'fa-chart-pie' },
+            { id: 'v14', title: 'Equilíbrio Hoje', desc: 'Hoje você concluiu tarefas em 4+ seções.', icon: 'fa-scale-unbalanced' },
             { id: 'v15', title: 'Sem Pendências Visíveis', desc: 'Hoje não há tarefas visíveis pendentes (e há tarefas).', icon: 'fa-check' },
             { id: 'v16', title: 'Recuperação', desc: 'Ontem foi <50% e hoje já é ≥50%.', icon: 'fa-bandage' },
             { id: 'v17', title: 'Nível Alto', desc: 'Seu nível atual é ≥ 10.', icon: 'fa-trophy' },
             { id: 'v18', title: 'Elite', desc: 'Seu nível atual é ≥ 20.', icon: 'fa-chess-king' },
             { id: 'v19', title: 'Cofre de XP', desc: 'XP total ≥ 5000.', icon: 'fa-vault' },
-            { id: 'v20', title: 'Rotina Densa', desc: 'Hoje você tem 12+ tarefas visíveis.', icon: 'fa-table-cells' },
-            { id: 'v21', title: 'Leve e Rápido', desc: 'Hoje você tem ≤4 tarefas visíveis e 100%.', icon: 'fa-feather' },
+            { id: 'v20', title: 'Rotina Densa', desc: 'Hoje você tem 16+ tarefas visíveis.', icon: 'fa-table-cells' },
+            { id: 'v21', title: 'Leve e Rápido', desc: 'Hoje você tem ≤3 tarefas visíveis e 100%.', icon: 'fa-feather' },
             { id: 'v22', title: 'Final de Semana ON', desc: 'É sábado ou domingo e seu dia está ≥70%.', icon: 'fa-mug-hot' },
             { id: 'v23', title: 'Modo Semana', desc: 'É dia útil (seg–sex) e seu dia está ≥50%.', icon: 'fa-briefcase' },
-            { id: 'v24', title: 'Picos Seguidos', desc: '3 dias seguidos com ≥70% de conclusão.', icon: 'fa-mountain' },
+            { id: 'v24', title: 'Picos Seguidos', desc: '3 dias seguidos com 80%+ de conclusão.', icon: 'fa-mountain' },
             { id: 'v25', title: 'Sem Zeros', desc: 'Nos últimos 14 dias, nenhum dia com 0% (com tarefas).', icon: 'fa-shield-heart' },
             { id: 'v26', title: 'Variação Hoje', desc: 'Hoje você concluiu tarefas em 3+ categorias.', icon: 'fa-tags' },
             { id: 'v27', title: 'Morning Win', desc: 'Hoje você concluiu ao menos 1 tarefa da seção “Rotina Matinal” (se existir).', icon: 'fa-sun' },
@@ -1576,36 +1594,36 @@
         ];
 
         const DAILY_ACHIEVEMENTS_DEF = [
-            { id: 'd1', title: 'Primeira faísca', desc: 'Conclua 1 tarefa hoje.', icon: 'fa-wand-magic-sparkles' },
-            { id: 'd2', title: 'Trinca rápida', desc: 'Conclua 4 tarefas hoje.', icon: 'fa-bolt' },
-            { id: 'd3', title: 'Mão cheia', desc: 'Conclua 7 tarefas hoje.', icon: 'fa-hand' },
-            { id: 'd4', title: 'Modo turbo', desc: 'Conclua 14 tarefas hoje.', icon: 'fa-rocket' },
-            { id: 'd5', title: 'XP inicial', desc: (s) => `Ganhe ${5 * (s.taskXp || 10)}+ XP hoje.`, icon: 'fa-coins' },
-            { id: 'd6', title: 'XP firme', desc: (s) => `Ganhe ${12 * (s.taskXp || 10)}+ XP hoje.`, icon: 'fa-bolt' },
-            { id: 'd7', title: 'XP alto', desc: (s) => `Ganhe ${20 * (s.taskXp || 10)}+ XP hoje.`, icon: 'fa-burst' },
-            { id: 'd8', title: 'XP lendário', desc: (s) => `Ganhe ${35 * (s.taskXp || 10)}+ XP hoje.`, icon: 'fa-gem' },
+            { id: 'd1', title: 'Primeira faísca', desc: 'Conclua 3 tarefas hoje.', icon: 'fa-wand-magic-sparkles' },
+            { id: 'd2', title: 'Trinca rápida', desc: 'Conclua 6 tarefas hoje.', icon: 'fa-bolt' },
+            { id: 'd3', title: 'Mão cheia', desc: 'Conclua 12 tarefas hoje.', icon: 'fa-hand' },
+            { id: 'd4', title: 'Modo turbo', desc: 'Conclua 20 tarefas hoje.', icon: 'fa-rocket' },
+            { id: 'd5', title: 'XP inicial', desc: (s) => `Ganhe ${8 * (s.taskXp || 10)}+ XP hoje.`, icon: 'fa-coins' },
+            { id: 'd6', title: 'XP firme', desc: (s) => `Ganhe ${18 * (s.taskXp || 10)}+ XP hoje.`, icon: 'fa-bolt' },
+            { id: 'd7', title: 'XP alto', desc: (s) => `Ganhe ${30 * (s.taskXp || 10)}+ XP hoje.`, icon: 'fa-burst' },
+            { id: 'd8', title: 'XP lendário', desc: (s) => `Ganhe ${50 * (s.taskXp || 10)}+ XP hoje.`, icon: 'fa-gem' },
             { id: 'd9', title: 'Saindo do zero', desc: 'Tenha 1%+ de conclusão hoje.', icon: 'fa-arrow-up' },
             { id: 'd10', title: 'Meio caminho', desc: 'Atinja 50%+ de conclusão hoje.', icon: 'fa-chart-simple' },
             { id: 'd11', title: 'Quase lá', desc: 'Atinja 80%+ de conclusão hoje.', icon: 'fa-bullseye' },
             { id: 'd12', title: 'Dia perfeito', desc: 'Atinja 100% de conclusão hoje (com tarefas).', icon: 'fa-circle-check' },
             { id: 'd13', title: 'Sem pendências visíveis', desc: 'Tenha 0 tarefas visíveis pendentes hoje (com tarefas).', icon: 'fa-check' },
-            { id: 'd14', title: 'Variedade de seções', desc: 'Conclua tarefas em 2+ seções hoje.', icon: 'fa-sitemap' },
-            { id: 'd15', title: 'Três frentes', desc: 'Conclua tarefas em 3+ seções hoje.', icon: 'fa-diagram-project' },
-            { id: 'd16', title: 'Duas categorias', desc: 'Conclua tarefas em 2+ categorias hoje.', icon: 'fa-tags' },
-            { id: 'd17', title: 'Três categorias', desc: 'Conclua tarefas em 3+ categorias hoje.', icon: 'fa-layer-group' },
-            { id: 'd18', title: 'Dia denso', desc: 'Tenha 12+ tarefas visíveis hoje.', icon: 'fa-table-cells' },
-            { id: 'd19', title: 'Dia leve', desc: 'Tenha até 4 tarefas visíveis hoje (com tarefas).', icon: 'fa-feather' },
-            { id: 'd20', title: 'Leve e perfeito', desc: 'Até 4 tarefas visíveis e 100% hoje.', icon: 'fa-feather' },
-            { id: 'd21', title: 'Extra 1', desc: 'Conclua 1 tarefa extra (sem template) hoje.', icon: 'fa-plus' },
-            { id: 'd22', title: 'Extras 3', desc: 'Conclua 3 tarefas extras (sem template) hoje.', icon: 'fa-plus-circle' },
+            { id: 'd14', title: 'Variedade de seções', desc: 'Conclua tarefas em 3+ seções hoje.', icon: 'fa-sitemap' },
+            { id: 'd15', title: 'Três frentes', desc: 'Conclua tarefas em 4+ seções hoje.', icon: 'fa-diagram-project' },
+            { id: 'd16', title: 'Duas categorias', desc: 'Conclua tarefas em 3+ categorias hoje.', icon: 'fa-tags' },
+            { id: 'd17', title: 'Três categorias', desc: 'Conclua tarefas em 4+ categorias hoje.', icon: 'fa-layer-group' },
+            { id: 'd18', title: 'Dia denso', desc: 'Tenha 16+ tarefas visíveis hoje.', icon: 'fa-table-cells' },
+            { id: 'd19', title: 'Dia leve', desc: 'Tenha até 3 tarefas visíveis hoje (com tarefas).', icon: 'fa-feather' },
+            { id: 'd20', title: 'Leve e perfeito', desc: 'Até 3 tarefas visíveis e 100% hoje.', icon: 'fa-feather' },
+            { id: 'd21', title: 'Extra 1', desc: 'Conclua 2 tarefas extras (sem template) hoje.', icon: 'fa-plus' },
+            { id: 'd22', title: 'Extras 3', desc: 'Conclua 5 tarefas extras (sem template) hoje.', icon: 'fa-plus-circle' },
             { id: 'd23', title: 'Sem ocultar', desc: 'Conclua o dia sem tarefas ocultas (com tarefas).', icon: 'fa-eye' },
-            { id: 'd24', title: 'Domingo ON', desc: 'Se for domingo, faça 50%+ hoje.', icon: 'fa-cloud-sun' },
-            { id: 'd25', title: 'Segunda guerreira', desc: 'Se for segunda, conclua 3+ tarefas hoje.', icon: 'fa-shield' },
+            { id: 'd24', title: 'Domingo ON', desc: 'Se for domingo, faça 60%+ hoje.', icon: 'fa-cloud-sun' },
+            { id: 'd25', title: 'Segunda guerreira', desc: 'Se for segunda, conclua 5+ tarefas hoje.', icon: 'fa-shield' },
             { id: 'd26', title: 'Recuperação', desc: 'Ontem foi <50% e hoje é ≥50%.', icon: 'fa-bandage' },
             { id: 'd27', title: 'Crescendo', desc: 'Últimos 3 dias: sua % aumentou dia a dia (com tarefas).', icon: 'fa-arrow-trend-up' },
-            { id: 'd28', title: 'Combinação rara', desc: 'Hoje: 80%+ e 8+ tarefas concluídas.', icon: 'fa-star' },
-            { id: 'd29', title: 'Ritmo constante', desc: (s) => `Hoje: 70%+ e ${15 * (s.taskXp || 10)}+ XP.`, icon: 'fa-chart-area' },
-            { id: 'd30', title: 'Quatro cantos (hoje)', desc: 'Hoje: conclua tarefas em 4+ categorias.', icon: 'fa-vector-square' }
+            { id: 'd28', title: 'Combinação rara', desc: 'Hoje: 85%+ e 10+ tarefas concluídas.', icon: 'fa-star' },
+            { id: 'd29', title: 'Ritmo constante', desc: (s) => `Hoje: 75%+ e ${20 * (s.taskXp || 10)}+ XP.`, icon: 'fa-chart-area' },
+            { id: 'd30', title: 'Quatro cantos (hoje)', desc: 'Hoje: conclua tarefas em 5+ categorias.', icon: 'fa-vector-square' }
         ];
 
         function getDayProgressSummary(dateStr) {
@@ -1691,36 +1709,36 @@
             const increasing3 = threeDays.every(v => typeof v === 'number') && (threeDays[0] < threeDays[1] && threeDays[1] < threeDays[2]);
 
             const checks = {
-                d1: s.completed >= 1,
-                d2: s.completed >= 4,
-                d3: s.completed >= 7,
-                d4: s.completed >= 14,
-                d5: s.xp >= (5 * taskXp),
-                d6: s.xp >= (12 * taskXp),
-                d7: s.xp >= (20 * taskXp),
-                d8: s.xp >= (35 * taskXp),
+                d1: s.completed >= 3,
+                d2: s.completed >= 6,
+                d3: s.completed >= 12,
+                d4: s.completed >= 20,
+                d5: s.xp >= (8 * taskXp),
+                d6: s.xp >= (18 * taskXp),
+                d7: s.xp >= (30 * taskXp),
+                d8: s.xp >= (50 * taskXp),
                 d9: s.percent >= 1 && s.total > 0,
                 d10: s.percent >= 50 && s.total > 0,
                 d11: s.percent >= 80 && s.total > 0,
                 d12: s.percent === 100 && s.total > 0,
                 d13: s.total > 0 && s.pending === 0,
-                d14: s.sectionsDone.size >= 2,
-                d15: s.sectionsDone.size >= 3,
-                d16: s.categoriesDone.size >= 2,
-                d17: s.categoriesDone.size >= 3,
-                d18: s.total >= 12,
-                d19: s.total > 0 && s.total <= 4,
-                d20: s.total > 0 && s.total <= 4 && s.percent === 100,
-                d21: s.extraCompleted >= 1,
-                d22: s.extraCompleted >= 3,
+                d14: s.sectionsDone.size >= 3,
+                d15: s.sectionsDone.size >= 4,
+                d16: s.categoriesDone.size >= 3,
+                d17: s.categoriesDone.size >= 4,
+                d18: s.total >= 16,
+                d19: s.total > 0 && s.total <= 3,
+                d20: s.total > 0 && s.total <= 3 && s.percent === 100,
+                d21: s.extraCompleted >= 2,
+                d22: s.extraCompleted >= 5,
                 d23: s.total > 0 && !s.hasHidden,
-                d24: isSunday && s.total > 0 && s.percent >= 50,
-                d25: isMonday && s.completed >= 3,
+                d24: isSunday && s.total > 0 && s.percent >= 60,
+                d25: isMonday && s.completed >= 5,
                 d26: (y.total > 0 && y.percent < 50) && (s.total > 0 && s.percent >= 50),
                 d27: increasing3,
-                d28: (s.total > 0 && s.percent >= 80 && s.completed >= 8),
-                d29: (s.total > 0 && s.percent >= 70 && s.xp >= (15 * taskXp)),
-                d30: s.categoriesDone.size >= 4
+                d28: (s.total > 0 && s.percent >= 85 && s.completed >= 10),
+                d29: (s.total > 0 && s.percent >= 75 && s.xp >= (20 * taskXp)),
+                d30: s.categoriesDone.size >= 5
             };
             syncDailyAchievementsForDate(dateStr, checks);
             saveState();
@@ -2022,34 +2040,34 @@
             const growing3 = pctLast3.every(v => v !== null) && (pctLast3[0] < pctLast3[1]) && (pctLast3[1] < pctLast3[2]);
 
             const checks = {
-                v1: pct >= 40 && total > 0,
-                v2: pct >= 70 && total > 0,
+                v1: pct >= 55 && total > 0,
+                v2: pct >= 80 && total > 0,
                 v3: pct === 100 && total > 0,
                 v4: state.user.streak >= 3,
                 v5: state.user.streak >= 7,
                 v6: state.user.streak >= 14,
                 v7: avg7 >= 60 && last7.length >= 5,
                 v8: perfectCount7 >= 5,
-                v9: day.xp >= (10 * taskXp),
-                v10: day.xp >= (22 * taskXp),
-                v11: comp >= 5,
-                v12: comp >= 10,
-                v13: comp > 0 && maxCat / comp >= 0.6,
-                v14: uniqSec >= 3,
+                v9: day.xp >= (15 * taskXp),
+                v10: day.xp >= (32 * taskXp),
+                v11: comp >= 8,
+                v12: comp >= 15,
+                v13: comp > 0 && maxCat / comp >= 0.7,
+                v14: uniqSec >= 4,
                 v15: total > 0 && comp === total,
                 v16: ypct < 50 && pct >= 50 && total > 0,
                 v17: state.user.level >= 10,
                 v18: state.user.level >= 20,
                 v19: state.user.xp >= 5000,
-                v20: total >= 12,
-                v21: total <= 4 && total > 0 && pct === 100,
+                v20: total >= 16,
+                v21: total <= 3 && total > 0 && pct === 100,
                 v22: weekend && pct >= 70 && total > 0,
                 v23: weekday && pct >= 50 && total > 0,
                 v24: last3high,
                 v25: last14noZero,
-                v26: todayCatCount >= 3,
+                v26: todayCatCount >= 4,
                 v27: morningDone,
-                v28: extraDoneToday >= 3,
+                v28: extraDoneToday >= 5,
                 v29: pct >= 80 && pct <= 99 && total > 0,
                 v30: growing3
             };
@@ -2283,6 +2301,14 @@
             // Ajustes de layout por tipo de modal
             if (content.querySelector('.level-codex')) {
                 content.classList.add('modal-codex');
+                // Adicionar botão fechar fixo no mobile
+                if (window.innerWidth <= 700) {
+                    const closeBtn = document.createElement('button');
+                    closeBtn.className = 'codex-close-fixed';
+                    closeBtn.innerHTML = '<i class="fas fa-times"></i> Fechar';
+                    closeBtn.onclick = closeModal;
+                    content.appendChild(closeBtn);
+                }
             }
             
             const cancelBtn = content.querySelector('.btn-cancel');
@@ -2636,6 +2662,10 @@
         }
 
         function openLevelCodex() {
+            // Fechar menu hamburger no mobile ao abrir o Códice
+            if (window.innerWidth <= 1024) {
+                document.body.classList.remove('nav-drawer-open');
+            }
             ensureSettings();
             const curLevel = Math.max(1, Number(state.user?.level) || 1);
             const total = Math.min(100, LEVEL_TITLES_BY_LEVEL.length, LEVEL_ICONS_BY_LEVEL.length);

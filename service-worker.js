@@ -2,10 +2,12 @@ const CACHE_NAME = 'nocturnalflow-v1';
 const urlsToCache = [
   '/',
   '/index.html',
+  '/manifest.json',
+  '/service-worker.js',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
-  'https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;700&display=swap',
+  'https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&display=swap',
   'https://i.imgur.com/qGogLhI.png',
-  'https://raw.githubusercontent.com/LaboratorioLamic/Dados/refs/heads/main/manifest.json'
+  'https://i.imgur.com/U5gqRAo.png'
 ];
 
 self.addEventListener('install', event => {

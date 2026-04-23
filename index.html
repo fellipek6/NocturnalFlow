@@ -855,6 +855,8 @@
         .history-log-header { padding: 16px; display: flex; justify-content: space-between; cursor: pointer; gap: 12px; background: rgba(255,255,255,0.02); }
         .history-log-body { padding: 15px; display: none; border-top: 1px solid rgba(255,255,255,0.08); }
         .history-log.open .history-log-body { display: block; }
+        .history-pagination { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+        .history-page-indicator { color: var(--text-muted); font-weight: 700; font-size: 0.88rem; }
 
         /* Icon picker (modal) */
         .icon-picker-btn { width: 100%; justify-content: center; gap: 10px; }
@@ -1175,12 +1177,13 @@
         <div id="tab-historico" class="tab-content">
             <h2>Histórico</h2>
             <div class="history-filters">
-                <button class="filter-btn active" data-filter="all">Todos</button>
+                <button class="filter-btn" data-filter="all">Todos</button>
                 <button class="filter-btn" data-filter="7">Últimos 7 dias</button>
-                <button class="filter-btn" data-filter="30">Últimos 30 dias</button>
+                <button class="filter-btn active" data-filter="30">Últimos 30 dias</button>
                 <button class="filter-btn" data-filter="perfect">Dias Perfeitos (100%)</button>
             </div>
             <div id="history-list"></div>
+            <div id="history-pagination" class="history-pagination"></div>
         </div>
 
         <div id="tab-secoes" class="tab-content">
@@ -2947,7 +2950,7 @@
             const perfectFlagData = [];
             
             const today = new Date();
-            for(let i=13; i>=0; i--) {
+            for(let i=29; i>=0; i--) {
                 let d = new Date(today);
                 d.setDate(today.getDate() - i);
                 const ds = getLocalYMD(d);
@@ -2973,7 +2976,7 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { display: false }, title: { display: true, text: 'XP por dia (14 dias)', color: '#b8c5eb' } },
+                    plugins: { legend: { display: false }, title: { display: true, text: 'XP por dia (30 dias)', color: '#b8c5eb' } },
                     scales: {
                         x: { ticks: { color: '#8b9fd4' }, grid: { color: 'rgba(76, 201, 240, 0.06)' } },
                         y: { ticks: { color: '#8b9fd4' }, grid: { color: 'rgba(124, 58, 237, 0.08)' }, beginAtZero: true }
@@ -3022,7 +3025,7 @@
                         y: { beginAtZero: true, max: 1, ticks: { stepSize: 1, color: '#8b9fd4', callback: v => v === 1 ? '100%' : '—' }, grid: { color: 'rgba(124, 58, 237, 0.08)' } },
                         x: { ticks: { color: '#8b9fd4' }, grid: { color: 'rgba(76, 201, 240, 0.06)' } }
                     },
-                    plugins: { legend: { display: false }, title: { display: true, text: 'Dias 100% (últimos 14 dias)', color: '#b8c5eb' } }
+                    plugins: { legend: { display: false }, title: { display: true, text: 'Dias 100% (últimos 30 dias)', color: '#b8c5eb' } }
                 }
             });
 
@@ -3070,7 +3073,9 @@
 
             const secCount = {};
             state.sections.forEach(s => { secCount[s.id] = 0; });
-            Object.values(state.history).forEach(day => {
+            const last30Set = new Set(dates);
+            Object.entries(state.history).forEach(([ds, day]) => {
+                if (!last30Set.has(ds)) return;
                 day.tasks.forEach(t => {
                     if (t.completed && !t.hidden && secCount[t.sectionId] !== undefined) secCount[t.sectionId]++;
                 });
@@ -3094,7 +3099,7 @@
                     maintainAspectRatio: false,
                     plugins: {
                         legend: pieLegend,
-                        title: { display: true, text: 'Distribuição por seção (concluídas)', ...pieTitleStyle }
+                        title: { display: true, text: 'Distribuição por seção (30 dias)', ...pieTitleStyle }
                     }
                 }
             });
@@ -3102,31 +3107,46 @@
             const wk = [0,0,0,0,0,0,0];
             const wkLabels = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
             Object.entries(state.history).forEach(([ds, day]) => {
+                if (!last30Set.has(ds)) return;
                 const wd = new Date(ds + 'T12:00:00').getDay();
                 day.tasks.forEach(t => { if (t.completed && !t.hidden) wk[wd]++; });
             });
             const ctxWkPie = document.getElementById('chart-weekday-pie').getContext('2d');
             chartInstances.wkPie = new Chart(ctxWkPie, {
-                type: 'doughnut',
+                type: 'bar',
                 data: {
                     labels: wkLabels,
-                    datasets: [{ data: wk, backgroundColor: pieNeon, borderWidth: 2, borderColor: 'rgba(12, 20, 40, 0.85)' }]
+                    datasets: [{
+                        label: 'Concluídas',
+                        data: wk,
+                        backgroundColor: [
+                            'rgba(76,201,240,0.75)','rgba(199,125,255,0.75)','rgba(124,58,237,0.75)',
+                            'rgba(92,240,216,0.75)','rgba(251,191,36,0.75)','rgba(232,121,249,0.75)','rgba(56,189,248,0.75)'
+                        ],
+                        borderColor: 'rgba(12, 20, 40, 0.85)',
+                        borderWidth: 2,
+                        borderRadius: 8
+                    }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    cutout: '52%',
+                    scales: {
+                        y: { beginAtZero: true, ticks: { color: '#8b9fd4' }, grid: { color: 'rgba(124, 58, 237, 0.08)' } },
+                        x: { ticks: { color: '#8b9fd4' }, grid: { color: 'rgba(76, 201, 240, 0.06)' } }
+                    },
                     plugins: {
-                        legend: pieLegend,
-                        title: { display: true, text: 'Mix por dia da semana (concluídas)', ...pieTitleStyle }
+                        legend: { display: false },
+                        title: { display: true, text: 'Proporção por dia da semana (30 dias)', ...pieTitleStyle }
                     }
                 }
             });
 
             const catXp = {};
             state.categories.forEach(c => catXp[c.id] = 0);
-            Object.values(state.history).forEach(day => {
-                day.tasks.forEach(t => { if(t.completed) { catXp[t.categoryId] = (catXp[t.categoryId] || 0) + 10; } });
+            Object.entries(state.history).forEach(([ds, day]) => {
+                if (!last30Set.has(ds)) return;
+                day.tasks.forEach(t => { if(t.completed) { catXp[t.categoryId] = (catXp[t.categoryId] || 0) + (t.lastXpAward || ensureSettings().taskXp || 10); } });
             });
 
             const ctxCat = document.getElementById('chart-xp-category').getContext('2d');
@@ -3141,7 +3161,7 @@
                     maintainAspectRatio: false,
                     cutout: '55%',
                     plugins: {
-                        title: { display: true, text: 'XP por Categoria (global)', color: '#b8c5eb', font: { size: 13, weight: '600' }, padding: { bottom: 8, top: 4 } },
+                        title: { display: true, text: 'XP por Categoria (30 dias)', color: '#b8c5eb', font: { size: 13, weight: '600' }, padding: { bottom: 8, top: 4 } },
                         legend: { position: 'bottom', labels: { color: '#9cb0dc', padding: 8, boxWidth: 12, font: { size: 10 } } }
                     }
                 }
@@ -3149,18 +3169,25 @@
         }
 
         // 3. HISTÓRICO
-        function renderHistorico(filter = 'all') {
+        function renderHistorico(filter = '30', page = 1) {
             const container = document.getElementById('history-list');
+            const pagination = document.getElementById('history-pagination');
             container.innerHTML = '';
+            pagination.innerHTML = '';
             
             // Updates filtros visual
             document.querySelectorAll('.filter-btn').forEach(b => {
                 b.classList.toggle('active', b.dataset.filter === filter);
-                b.onclick = () => renderHistorico(b.dataset.filter);
+                b.onclick = () => renderHistorico(b.dataset.filter, 1);
             });
 
             const dates = Object.keys(state.history).sort().reverse();
-            let count = 0;
+            const ALL_PAGE_SIZE = 20;
+            let rendered = 0;
+            let skippedAll = 0;
+            const pageIndex = Math.max(1, Number(page) || 1);
+            const pageStart = (pageIndex - 1) * ALL_PAGE_SIZE;
+            let totalAllEligible = 0;
 
             dates.forEach(date => {
                 const data = state.history[date];
@@ -3171,10 +3198,16 @@
 
                 // Aplica filtros
                 if(filter === 'perfect' && pct !== 100) return;
-                if(filter === '7' && count >= 7) return;
-                if(filter === '30' && count >= 30) return;
-
-                count++;
+                if(filter === '7' && rendered >= 7) return;
+                if(filter === '30' && rendered >= 30) return;
+                if(filter === 'all') {
+                    totalAllEligible++;
+                    if (skippedAll < pageStart) {
+                        skippedAll++;
+                        return;
+                    }
+                    if (rendered >= ALL_PAGE_SIZE) return;
+                }
 
                 const logHtml = `
                     <div class="history-log" onclick="this.classList.toggle('open')">
@@ -3195,9 +3228,26 @@
                     </div>
                 `;
                 container.innerHTML += logHtml;
+                rendered++;
             });
             
             if(container.innerHTML === '') container.innerHTML = '<p>Nenhum registro encontrado.</p>';
+
+            if (filter === 'all') {
+                const totalPages = Math.max(1, Math.ceil(totalAllEligible / ALL_PAGE_SIZE));
+                const safePage = Math.min(pageIndex, totalPages);
+                const prevDisabled = safePage <= 1;
+                const nextDisabled = safePage >= totalPages;
+                pagination.innerHTML = `
+                    <button class="btn-primary" id="history-page-prev" ${prevDisabled ? 'disabled' : ''}><i class="fas fa-chevron-left"></i> Anterior</button>
+                    <span class="history-page-indicator">Página ${safePage} de ${totalPages}</span>
+                    <button class="btn-primary" id="history-page-next" ${nextDisabled ? 'disabled' : ''}>Próxima <i class="fas fa-chevron-right"></i></button>
+                `;
+                const prevBtn = document.getElementById('history-page-prev');
+                const nextBtn = document.getElementById('history-page-next');
+                if (prevBtn && !prevDisabled) prevBtn.onclick = () => renderHistorico('all', safePage - 1);
+                if (nextBtn && !nextDisabled) nextBtn.onclick = () => renderHistorico('all', safePage + 1);
+            }
         }
 
         // 4. SEÇÕES E TEMPLATES

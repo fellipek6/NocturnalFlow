@@ -1413,7 +1413,7 @@
                     <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 15px;">Exporte ou importe seu progresso (formato JSON).</p>
                     <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                         <button id="btn-export" class="btn-primary"><i class="fas fa-download"></i> Exportar</button>
-                        <input type="file" id="file-import" style="display: none;" accept=".json">
+                        <input type="file" id="file-import" style="display: none;" accept=".json,application/json" multiple="false" capture="false">
                         <button id="btn-import" onclick="document.getElementById('file-import').click()"><i class="fas fa-upload"></i> Importar</button>
                     </div>
                 </div>
@@ -4165,6 +4165,15 @@
             document.getElementById('file-import').onchange = (e) => {
                 const file = e.target.files[0];
                 if(!file) return;
+                
+                // Validação adicional para mobile
+                const fileName = file.name.toLowerCase();
+                if(!fileName.endsWith('.json')) {
+                    showToast('Por favor, selecione um arquivo JSON válido.', 'error');
+                    e.target.value = ''; // Limpar o input
+                    return;
+                }
+                
                 const reader = new FileReader();
                 reader.onload = (event) => {
                     try {
@@ -4177,11 +4186,22 @@
                             saveState();
                             showToast('Dados importados com sucesso!', 'success');
                             setTimeout(() => location.reload(), 1500);
-                        } else { throw new Error('Formato inválido'); }
+                        } else { 
+                            throw new Error('Formato inválido'); 
+                        }
                     } catch(err) {
-                        showToast('Erro ao importar arquivo.', 'error');
+                        console.error('Erro de importação:', err);
+                        showToast('Erro ao importar arquivo. Verifique se é um backup válido.', 'error');
                     }
+                    // Limpar o input após tentativa
+                    e.target.value = '';
                 };
+                
+                reader.onerror = () => {
+                    showToast('Erro ao ler o arquivo. Tente novamente.', 'error');
+                    e.target.value = '';
+                };
+                
                 reader.readAsText(file);
             };
 

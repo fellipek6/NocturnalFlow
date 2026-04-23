@@ -303,17 +303,19 @@
             grid-template-areas:
                 "title title"
                 "badge icon"
-                "hint hint";
+                "hint hint"
+                "details details";
             gap: 10px 12px;
             align-items: center;
             padding: 14px;
-            border-radius: 16px;
+            border-radius: 18px;
             border: 1px solid rgba(255,255,255,0.08);
             background: linear-gradient(155deg, rgba(12, 20, 40, 0.92), rgba(8, 14, 30, 0.86));
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28), inset 0 0 24px rgba(124, 58, 237, 0.05);
-            transition: transform 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
+            box-shadow: 0 12px 34px rgba(0, 0, 0, 0.30), inset 0 0 24px rgba(124, 58, 237, 0.05);
+            transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease, background 220ms ease;
             position: relative;
             overflow: hidden;
+            cursor: pointer;
         }
         .level-card::before {
             content: '';
@@ -327,7 +329,11 @@
         .level-card:hover {
             transform: translateY(-2px);
             border-color: rgba(199, 125, 255, 0.28);
-            box-shadow: 0 14px 40px rgba(0, 0, 0, 0.35), 0 0 26px rgba(76, 201, 240, 0.10);
+            box-shadow: 0 18px 44px rgba(0, 0, 0, 0.35), 0 0 28px rgba(76, 201, 240, 0.12);
+        }
+        .level-card.expanded {
+            transform: translateY(-2px) scale(1.01);
+            border-color: rgba(232, 237, 255, 0.24);
         }
         .level-card .lvl-badge {
             grid-area: badge;
@@ -377,6 +383,50 @@
             color: var(--text-muted);
             font-size: 0.84rem;
             line-height: 1.35;
+        }
+        .level-card .lvl-details {
+            grid-area: details;
+            display: grid;
+            gap: 10px;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: max-height 260ms ease, opacity 260ms ease;
+        }
+        .level-card.expanded .lvl-details {
+            max-height: 240px;
+            opacity: 1;
+        }
+        .lvl-details-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            font-size: 0.88rem;
+            color: #d9e2ff;
+        }
+        .lvl-details-row strong {
+            color: #ffffff;
+        }
+        .progress-bar-bg {
+            background: rgba(15, 30, 61, 0.9);
+            height: 10px;
+            border-radius: 999px;
+            margin-top: 0;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .progress-bar-fill {
+            background: linear-gradient(90deg, rgba(121, 58, 255, 0.95), rgba(76, 201, 240, 0.95));
+            height: 100%;
+            width: 0%;
+            transition: width 0.65s cubic-bezier(0.2, 1, 0.3, 1);
+            box-shadow: 0 0 18px rgba(76, 201, 240, 0.22);
+        }
+        .lvl-detail-note {
+            font-size: 0.82rem;
+            color: rgba(255,255,255,0.72);
+            letter-spacing: 0.01em;
+            line-height: 1.45;
         }
 
         .tier-toggle-btn {
@@ -2187,6 +2237,21 @@
             const idx = Math.min(LEVEL_ICONS_BY_LEVEL.length - 1, Math.max(0, Math.floor(Math.max(1, level) - 1)));
             return LEVEL_ICONS_BY_LEVEL[idx] || 'fa-star';
         }
+        function getTierColorForLevel(level) {
+            const colors = ['#7c3aed', '#3b82f6', '#0ea5e9', '#8b5cf6', '#f97316', '#22d3ee', '#a855f7', '#14b8a6', '#f472b6', '#38bdf8'];
+            const index = Math.min(colors.length - 1, Math.max(0, Math.floor((Math.max(1, level) - 1) / 10)));
+            return colors[index];
+        }
+        function getLevelTargetXP(level, step = ensureSettings().levelXpStep) {
+            const lvl = Math.max(1, level);
+            return lvl <= 1 ? 0 : getXPBoundsForLevel(lvl, step).currBase;
+        }
+        function getLevelProgressForLevel(level) {
+            const xp = Math.max(0, state.user?.xp || 0);
+            const target = getLevelTargetXP(level);
+            if (level <= 1) return xp > 0 ? 100 : 0;
+            return Math.min(100, Math.max(0, Math.round((xp / Math.max(target, 1)) * 100)));
+        }
         function recalculateUserLevel() {
             ensureSettings();
             const prevLevel = state.user.level || 1;
@@ -2580,17 +2645,28 @@
                 const name = LEVEL_TITLES_BY_LEVEL[i];
                 const icon = LEVEL_ICONS_BY_LEVEL[i] || 'fa-star';
                 const isCurrent = lvl === curLevel;
-                return `
-                    <div class="level-card" style="${isCurrent ? 'border-color: rgba(92,240,216,0.38); box-shadow: 0 14px 44px rgba(0,0,0,0.35), 0 0 26px rgba(92,240,216,0.12);' : ''}">
-                        <div class="lvl-info">
-                            <div class="lvl-name">${name}</div>
-                            <div class="lvl-badge">Lvl ${lvl}</div>
-                            <div class="lvl-icon"><i class="fas ${icon}"></i></div>
-                            <div class="lvl-hint">${isCurrent ? 'Seu título atual' : (lvl < curLevel ? 'Já conquistado' : 'A conquistar')}</div>
+                    const tierColor = getTierColorForLevel(lvl);
+                    const targetXP = getLevelTargetXP(lvl);
+                    const progress = getLevelProgressForLevel(lvl);
+                    const statusLabel = isCurrent ? 'Seu título atual' : (lvl < curLevel ? 'Já conquistado' : 'A conquistar');
+                    const progressText = lvl <= 1 ? 'Título inicial desbloqueado' : `${Math.min(Math.max(0, state.user?.xp || 0), targetXP)} / ${targetXP} XP`;
+                    return `
+                        <div class="level-card" style="border-color: ${tierColor}33; box-shadow: 0 18px 42px ${tierColor}22, inset 0 0 22px ${tierColor}14;">
+                            <div class="lvl-info">
+                                <div class="lvl-name">${name}</div>
+                                <div class="lvl-badge">Lvl ${lvl}</div>
+                                <div class="lvl-icon"><i class="fas ${icon}"></i></div>
+                                <div class="lvl-hint">${statusLabel}</div>
+                            </div>
+                            <div class="lvl-details">
+                                <div class="lvl-details-row"><strong>XP atual</strong><span>${Math.max(0, state.user?.xp || 0)} XP</span></div>
+                                <div class="lvl-details-row"><strong>Meta do título</strong><span>${lvl <= 1 ? '0 XP' : `${targetXP} XP`}</span></div>
+                                <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: ${progress}%; background: linear-gradient(90deg, ${tierColor}cc, ${tierColor}, ${tierColor}bb);"></div></div>
+                                <div class="lvl-detail-note">${lvl <= 1 ? 'Título inicial já desbloqueado.' : `Progresso atual para este título: ${progress}%`}</div>
+                            </div>
                         </div>
-                    </div>
-                `;
-            }).join('');
+                    `;
+                }).join('');
 
             openModal(`
                 <div class="level-codex">
@@ -2627,6 +2703,20 @@
                     showToast(state.settings.levelThemeEnabled ? 'Cores por nível ativadas.' : 'Cores por nível desativadas.', 'info');
                 };
             }
+
+            document.querySelectorAll('.level-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const isExpanded = card.classList.toggle('expanded');
+                    const details = card.querySelector('.lvl-details');
+                    if (details) {
+                        if (isExpanded) {
+                            details.style.maxHeight = details.scrollHeight + 'px';
+                        } else {
+                            details.style.maxHeight = '0px';
+                        }
+                    }
+                });
+            });
         }
 
         function updateAchievementsToggleButton() {
@@ -3012,7 +3102,6 @@
             const xpData = [];
             const compRateData = [];
             const tasksDoneData = [];
-            const perfectFlagData = [];
             
             const today = new Date();
             for(let i=29; i>=0; i--) {
@@ -3028,20 +3117,30 @@
                     const comp = tasks.filter(t=>t.completed).length;
                     compRateData.push(tasks.length ? (comp/tasks.length)*100 : 0);
                     tasksDoneData.push(comp);
-                    perfectFlagData.push(tasks.length && comp === tasks.length ? 1 : 0);
                 } else {
-                    xpData.push(0); compRateData.push(0); tasksDoneData.push(0); perfectFlagData.push(0);
+                    xpData.push(0); compRateData.push(0); tasksDoneData.push(0);
                 }
+            }
+
+            // Dados para XP Semanal (últimos 7 dias)
+            const xpWeekData = [];
+            const xpWeekLabels = [];
+            for(let i=6; i>=0; i--) {
+                let d = new Date(today);
+                d.setDate(today.getDate() - i);
+                const ds = getLocalYMD(d);
+                xpWeekLabels.push(d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }));
+                xpWeekData.push(state.history[ds]?.xp || 0);
             }
 
             const ctxXp = document.getElementById('chart-xp-week').getContext('2d');
             chartInstances.xp = new Chart(ctxXp, {
                 type: 'bar',
-                data: { labels: datesPt, datasets: [{ label: 'XP Diário', data: xpData, backgroundColor: palette.violet, borderRadius: 6 }] },
+                data: { labels: xpWeekLabels, datasets: [{ label: 'XP Semanal', data: xpWeekData, backgroundColor: palette.violet, borderRadius: 6 }] },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { display: false }, title: { display: true, text: 'XP por dia (30 dias)', color: '#b8c5eb' } },
+                    plugins: { legend: { display: false }, title: { display: true, text: 'XP Semanal (7 dias)', color: '#b8c5eb' } },
                     scales: {
                         x: { ticks: { color: '#8b9fd4' }, grid: { color: 'rgba(76, 201, 240, 0.06)' } },
                         y: { ticks: { color: '#8b9fd4' }, grid: { color: 'rgba(124, 58, 237, 0.08)' }, beginAtZero: true }
@@ -3079,20 +3178,13 @@
                 }
             });
 
-            const ctxPerfect = document.getElementById('chart-perfect-days').getContext('2d');
-            chartInstances.perfect = new Chart(ctxPerfect, {
-                type: 'bar',
-                data: { labels: datesPt, datasets: [{ label: 'Dia perfeito', data: perfectFlagData, backgroundColor: palette.amber, borderRadius: 6 }] },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: { beginAtZero: true, max: 1, ticks: { stepSize: 1, color: '#8b9fd4', callback: v => v === 1 ? '100%' : '—' }, grid: { color: 'rgba(124, 58, 237, 0.08)' } },
-                        x: { ticks: { color: '#8b9fd4' }, grid: { color: 'rgba(76, 201, 240, 0.06)' } }
-                    },
-                    plugins: { legend: { display: false }, title: { display: true, text: 'Dias 100% (últimos 30 dias)', color: '#b8c5eb' } }
-                }
-            });
+            // Conclusões por categoria (últimos 30 dias) - linhas por categoria
+            const categoryLines = state.categories.map(c => ({
+                id: c.id,
+                name: c.name,
+                color: c.color || palette.violet,
+                values: []
+            }));
 
             const cumLabels = [];
             const cumData = [];
@@ -3104,7 +3196,42 @@
                 cumLabels.push(d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }));
                 cumRun += state.history[ds]?.xp || 0;
                 cumData.push(cumRun);
+
+                const dayTasks = state.history[ds]?.tasks.filter(t => t.completed && !t.hidden) || [];
+                categoryLines.forEach(category => {
+                    category.values.push(dayTasks.filter(t => t.categoryId === category.id).length);
+                });
             }
+            
+            const last30Set = new Set(dates);
+            const ctxPerfect = document.getElementById('chart-perfect-days').getContext('2d');
+            chartInstances.perfect = new Chart(ctxPerfect, {
+                type: 'line',
+                data: {
+                    labels: cumLabels,
+                    datasets: categoryLines.map(category => ({
+                        label: category.name,
+                        data: category.values,
+                        borderColor: category.color,
+                        backgroundColor: category.color + '33',
+                        tension: 0.35,
+                        fill: false,
+                        borderWidth: 2,
+                        pointRadius: 2,
+                        pointHoverRadius: 5
+                    }))
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, ticks: { color: '#8b9fd4' }, grid: { color: 'rgba(124, 58, 237, 0.08)' } },
+                        x: { ticks: { color: '#8b9fd4' }, grid: { color: 'rgba(76, 201, 240, 0.06)' } }
+                    },
+                    plugins: { legend: { display: true, labels: { color: '#9cb0dc' } }, title: { display: true, text: 'Conclusões das categorias (30 dias)', color: '#b8c5eb' } }
+                }
+            });
+
             const ctxCum = document.getElementById('chart-cumulative-xp').getContext('2d');
             chartInstances.cumulative = new Chart(ctxCum, {
                 type: 'line',
@@ -3138,7 +3265,6 @@
 
             const secCount = {};
             state.sections.forEach(s => { secCount[s.id] = 0; });
-            const last30Set = new Set(dates);
             Object.entries(state.history).forEach(([ds, day]) => {
                 if (!last30Set.has(ds)) return;
                 day.tasks.forEach(t => {
@@ -3770,7 +3896,7 @@
             <div class="install-banner-actions">
                 <button id="install-app-button" class="btn-primary">Instalar</button>
                 <button id="install-never-button" class="btn-danger">Nunca mais mostrar</button>
-                <button id="install-close-button" aria-label="Fechar"> ×</button>
+                <button id="install-close-button" aria-label="Fechar">   ×</button>
             </div>
         </div>
     </div>

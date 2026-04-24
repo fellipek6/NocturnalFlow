@@ -244,11 +244,50 @@
             cursor: pointer;
             padding: 8px 10px;
             border-radius: 14px;
-            border: 1px solid rgba(199, 125, 255, 0.12);
-            background: linear-gradient(135deg, rgba(199, 125, 255, 0.10), rgba(76, 201, 240, 0.06));
             position: relative;
             overflow: hidden;
             transition: transform 240ms ease, box-shadow 240ms ease, border-color 240ms ease, background 240ms ease;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: glassFrameFloat 4s ease-in-out infinite;
+        }
+        @keyframes glassFrameFloat {
+            0%, 100% {
+                transform: translateY(0px);
+                box-shadow: 
+                    0 0 0 1px rgba(255, 255, 255, 0.1),
+                    0 4px 12px rgba(0, 0, 0, 0.1),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+                background: rgba(255, 255, 255, 0.05);
+            }
+            25% {
+                transform: translateY(-2px);
+                box-shadow: 
+                    0 0 0 1px rgba(255, 255, 255, 0.15),
+                    0 8px 24px rgba(0, 0, 0, 0.15),
+                    0 0 20px rgba(255, 255, 255, 0.05),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+                background: rgba(255, 255, 255, 0.08);
+            }
+            50% {
+                transform: translateY(-1px);
+                box-shadow: 
+                    0 0 0 1px rgba(255, 255, 255, 0.2),
+                    0 6px 18px rgba(0, 0, 0, 0.12),
+                    0 0 30px rgba(255, 255, 255, 0.08),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+                background: rgba(255, 255, 255, 0.06);
+            }
+            75% {
+                transform: translateY(-3px);
+                box-shadow: 
+                    0 0 0 1px rgba(255, 255, 255, 0.18),
+                    0 10px 28px rgba(0, 0, 0, 0.18),
+                    0 0 25px rgba(255, 255, 255, 0.06),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.32);
+                background: rgba(255, 255, 255, 0.07);
+            }
         }
         .level-title.level-title-clickable::after {
             content: '';
@@ -3785,6 +3824,8 @@
             const pageIndex = Math.max(1, Number(page) || 1);
             const pageStart = (pageIndex - 1) * ALL_PAGE_SIZE;
             let totalAllEligible = 0;
+            let totalPerfectEligible = 0;
+            let skippedPerfect = 0;
 
             dates.forEach(date => {
                 const data = state.history[date];
@@ -3794,7 +3835,15 @@
                 const pct = total ? Math.round((comp/total)*100) : 0;
 
                 // Aplica filtros
-                if(filter === 'perfect' && pct !== 100) return;
+                if(filter === 'perfect') {
+                    if (pct !== 100) return;
+                    totalPerfectEligible++;
+                    if (skippedPerfect < pageStart) {
+                        skippedPerfect++;
+                        return;
+                    }
+                    if (rendered >= ALL_PAGE_SIZE) return;
+                }
                 if(filter === '7' && rendered >= 7) return;
                 if(filter === '30' && rendered >= 30) return;
                 if(filter === 'all') {
@@ -3844,6 +3893,22 @@
                 const nextBtn = document.getElementById('history-page-next');
                 if (prevBtn && !prevDisabled) prevBtn.onclick = () => renderHistorico('all', safePage - 1);
                 if (nextBtn && !nextDisabled) nextBtn.onclick = () => renderHistorico('all', safePage + 1);
+            }
+            
+            if (filter === 'perfect') {
+                const totalPages = Math.max(1, Math.ceil(totalPerfectEligible / ALL_PAGE_SIZE));
+                const safePage = Math.min(pageIndex, totalPages);
+                const prevDisabled = safePage <= 1;
+                const nextDisabled = safePage >= totalPages;
+                pagination.innerHTML = `
+                    <button class="btn-primary" id="history-page-prev" ${prevDisabled ? 'disabled' : ''}><i class="fas fa-chevron-left"></i> Anterior</button>
+                    <span class="history-page-indicator">Página ${safePage} de ${totalPages}</span>
+                    <button class="btn-primary" id="history-page-next" ${nextDisabled ? 'disabled' : ''}>Próxima <i class="fas fa-chevron-right"></i></button>
+                `;
+                const prevBtn = document.getElementById('history-page-prev');
+                const nextBtn = document.getElementById('history-page-next');
+                if (prevBtn && !prevDisabled) prevBtn.onclick = () => renderHistorico('perfect', safePage - 1);
+                if (nextBtn && !nextDisabled) nextBtn.onclick = () => renderHistorico('perfect', safePage + 1);
             }
         }
 

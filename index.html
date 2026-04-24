@@ -304,7 +304,7 @@
         }
         .level-codex-grid {
             display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
+            grid-template-columns: repeat(5, minmax(0, 1fr));
             gap: 12px;
             overflow-y: auto;
             padding-right: 6px;
@@ -1160,6 +1160,36 @@
             .modal-codex .level-codex-grid::-webkit-scrollbar { width: 6px; }
             .modal-codex .level-codex-grid::-webkit-scrollbar-thumb { background: rgba(90,240,255,0.2); border-radius: 4px; }
             
+            /* Headers de tier responsivos */
+            .modal-codex .tier-header {
+                z-index: 10 !important;
+            }
+            .modal-codex .tier-header h3 {
+                font-size: 1.1rem !important;
+            }
+            .modal-codex .tier-header i {
+                font-size: 1.3rem !important;
+            }
+            @media (max-width: 700px) {
+                .modal-codex .tier-header {
+                    padding: 10px 12px !important;
+                    margin: 15px 0 10px 0 !important;
+                }
+                .modal-codex .tier-header h3 {
+                    font-size: 0.95rem !important;
+                    letter-spacing: 0.05em !important;
+                }
+                .modal-codex .tier-header p {
+                    font-size: 0.75rem !important;
+                }
+                .modal-codex .tier-header i {
+                    font-size: 1.1rem !important;
+                }
+                .modal-codex .tier-header div {
+                    gap: 8px !important;
+                }
+            }
+            
             /* Layout mobile dos cards: ícone | nome | lvl */
             .modal-codex .level-card {
                 display: flex !important;
@@ -1213,7 +1243,7 @@
             }
             @media(min-width: 701px) {
                 .modal-codex .desktop-only {
-                    display: inline-flex;
+                    display: none;
                 }
             }
             .level-codex-grid {
@@ -1235,12 +1265,12 @@
             .task-actions { opacity: 1 !important; }
         }
 
-        /* Códice de Títulos (desktop): grade de 4 colunas */
+        /* Códice de Títulos (desktop): grade de 5 colunas */
         @media(min-width: 701px) {
             .modal.modal-codex { width: min(1180px, 96vw); max-height: 90vh; overflow: hidden; display: flex; flex-direction: column; padding: 22px; }
             .level-codex-grid {
                 display: grid;
-                grid-template-columns: repeat(4, minmax(0, 1fr));
+                grid-template-columns: repeat(5, minmax(0, 1fr));
                 gap: 12px;
                 overflow-y: auto;
                 padding-right: 6px;
@@ -1523,8 +1553,8 @@
         const WEEKDAY_NAMES = ['Dom','Seg','Ter','Qua','Qui','Sex','Sab'];
 
         const DEFAULT_SETTINGS = {
-            levelXpStep: 50,
-            taskXp: 10,
+            levelXpStep: 10,
+            taskXp: 5,
             showOnlyUnlockedAchievements: true,
             levelThemeEnabled: true
         };
@@ -2860,7 +2890,7 @@
         }
 
         function openLevelCodexModal(allCards, curLevel, total, initialPage = 1) {
-            const ITEMS_PER_PAGE = 20;
+            const ITEMS_PER_PAGE = 10;
             const totalPages = Math.ceil(total / ITEMS_PER_PAGE);
             const currentPage = Math.min(Math.max(1, initialPage), totalPages);
 
@@ -2868,18 +2898,37 @@
                 const start = (page - 1) * ITEMS_PER_PAGE;
                 const end = Math.min(start + ITEMS_PER_PAGE, total);
                 
-                // Dividir os cards em strings individuais (aproximadamente)
+                // Array com dados das tiers para uso no header
+                const tierData = [
+                    { name: 'Iniciante', icon: 'fa-seedling' },
+                    { name: 'Aprendiz', icon: 'fa-book' },
+                    { name: 'Intermediário', icon: 'fa-graduation-cap' },
+                    { name: 'Avançado', icon: 'fa-award' },
+                    { name: 'Experiente', icon: 'fa-star' },
+                    { name: 'Veterano', icon: 'fa-shield' },
+                    { name: 'Mestre', icon: 'fa-crown' },
+                    { name: 'Lendário', icon: 'fa-fire' },
+                    { name: 'Épico', icon: 'fa-bolt' },
+                    { name: 'Supremo', icon: 'fa-gem' }
+                ];
+                
+                // Calcular qual tier está sendo exibida na página atual
+                const firstLevel = start + 1;
+                const currentTierNum = Math.floor((firstLevel - 1) / 10);
+                const currentTierInfo = tierData[Math.min(currentTierNum, 9)];
+                const currentTierColor = getTierColorForLevel(firstLevel);
+                
+                // Dividir os cards em strings individuais (sem headers)
                 const cardLines = [];
-                let currentCard = '';
+                
                 for (let i = 0; i < allCards.length; i++) {
-                    // Simples divisão baseada em indice
                     if (i >= start && i < end) {
                         const lvl = i + 1;
                         const name = LEVEL_TITLES_BY_LEVEL[i];
                         const icon = LEVEL_ICONS_BY_LEVEL[i] || 'fa-star';
+                        const tierColor = getTierColorForLevel(lvl);
                         const isCurrent = lvl === curLevel;
                         const isCompleted = lvl < curLevel;
-                        const tierColor = getTierColorForLevel(lvl);
                         const targetXP = getLevelTargetXP(lvl);
                         const progress = getLevelProgressForLevel(lvl);
                         const statusLabel = isCurrent ? 'Seu título atual' : (isCompleted ? 'Já conquistado' : 'A conquistar');
@@ -2932,7 +2981,23 @@
                     <div class="level-codex">
                         <div class="level-codex-header">
                             <div>
-                                <h2>Códice de Títulos</h2>
+                                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                                    <h2 style="margin: 0;">Códice de Títulos</h2>
+                                    <div style="
+                                        display: flex; 
+                                        align-items: center; 
+                                        gap: 8px; 
+                                        padding: 6px 12px; 
+                                        background: linear-gradient(135deg, ${currentTierColor}15, ${currentTierColor}08); 
+                                        border: 1px solid ${currentTierColor}30; 
+                                        border-radius: 20px;
+                                    ">
+                                        <i class="fas ${currentTierInfo.icon}" style="color: ${currentTierColor}; font-size: 1rem;"></i>
+                                        <span style="color: ${currentTierColor}; font-weight: 600; font-size: 0.9rem;">
+                                            Tier ${currentTierNum + 1} — ${currentTierInfo.name}
+                                        </span>
+                                    </div>
+                                </div>
                                 <div class="level-codex-sub">100 títulos (1 por nível) — estilo RPG / progressão</div>
                             </div>
                             <div class="actions" style="margin-top: 0;">
@@ -2997,7 +3062,7 @@
             const total = Math.min(100, LEVEL_TITLES_BY_LEVEL.length, LEVEL_ICONS_BY_LEVEL.length);
             
             // Calcular página inicial baseada no nível atual
-            const ITEMS_PER_PAGE = 20;
+            const ITEMS_PER_PAGE = 10;
             const initialPage = Math.ceil(curLevel / ITEMS_PER_PAGE);
 
             const cards = Array.from({ length: total }, (_, i) => {
